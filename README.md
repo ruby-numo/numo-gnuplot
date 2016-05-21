@@ -3,9 +3,9 @@
 * Alpha version under development.
 * [GitHub site](https://github.com/masa16/numo-gnuplot)
 
-Although many Gnuplot interface libraries for Ruby language have been
-developed, they do not have so simple interface that you can see x-y
-data plot by just typing as:
+Although many [other Gnuplot interface libraries for Ruby](https://github.com/masa16/numo-gnuplot#related-work)
+language have beendeveloped, they do not have so simple interface that
+you can see x-y data plot by just typing as:
 
     plot x,y
 
@@ -75,8 +75,24 @@ require "numo/narray"
 Numo.gnuplot do
   x = Numo::DFloat[0..100]/10
   y = Numo::NMath.sin(x)
-  set title:"Third Example"
+  set title:"X-Y data plot"
   plot x,y, w:'lines', t:'sin(x)'
+end
+```
+
+* Plotting multiple data series.
+```ruby
+require 'numo/gnuplot'
+require 'numo/narray'
+DF = Numo::DFloat
+NM = Numo::NMath
+
+Numo.gnuplot do
+  n = 60
+  x = DF[-n..n]/n*10
+  set title:"multiple data series"
+  plot x,NM.sin(x), {w:'points',t:'sin(x)'}, x,x*NM.sin(x),{w:"lines",t:'x*sin(x)'}
+  gets
 end
 ```
 
@@ -92,7 +108,7 @@ Numo.gnuplot do
   r = Numo::NMath.sqrt(x**2+y**2) + 1e-10
   z = Numo::NMath.sin(r)/r
 
-  set title:'Math function example'
+  set title:'2D data plot'
   set dgrid3d:[60,60]
   splot z, w:'pm3d', t:'sin(r)/r'
 end
