@@ -3,15 +3,15 @@
 * Alpha version under development.
 * [GitHub site](https://github.com/masa16/numo-gnuplot)
 
-Although many [other Gnuplot interface libraries for Ruby](https://github.com/masa16/numo-gnuplot#related-work)
-language have beendeveloped, they do not have so simple interface that
-you can see x-y data plot by just typing as:
+Although there are many [other Gnuplot interface libraries for Ruby](https://github.com/masa16/numo-gnuplot#related-work),
+they do not have such simple interface that
+the plot of x-y data is obtained by just typing as:
 
     plot x,y
 
-Numo::Gnuplot achieves this by only one class with the same inteface
-with Gnuplot command, and no other class which causes extra learning
-costs.
+Numo::Gnuplot achieves this by providing only one class which has
+the same inteface with Gnuplot command line, and no other class which
+causes extra learning costs.
 
 ## Installation
 
