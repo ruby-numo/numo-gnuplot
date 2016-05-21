@@ -80,7 +80,7 @@ Numo.gnuplot do
 end
 ```
 
-* Plotting multiple data series.
+* Multiple data are separated with Hash or put in another Array.
 ```ruby
 require 'numo/gnuplot'
 require 'numo/narray'
@@ -94,6 +94,15 @@ Numo.gnuplot do
   plot x,NM.sin(x), {w:'points',t:'sin(x)'}, x,x*NM.sin(x),{w:"lines",t:'x*sin(x)'}
   gets
 end
+
+Numo.gnuplot do
+  n = 60
+  x = DF[-n..n]/n*10
+  set title:"multiple data series"
+  plot [x,NM.sin(x), w:'points',t:'sin(x)'], [x,x*NM.sin(x),w:"lines",t:'x*sin(x)']
+  gets
+end
+
 ```
 
 * Plotting 2D arrays in 3D.
