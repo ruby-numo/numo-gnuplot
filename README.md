@@ -5,7 +5,7 @@
 
 Although there are many [other Gnuplot interface libraries for Ruby](https://github.com/masa16/numo-gnuplot#related-work),
 they do not have such simple interface that
-the plot of x-y data is obtained by just typing as:
+the plot of x-y data is obtained by just typing:
 
     plot x,y
 
@@ -72,51 +72,47 @@ irb(gnuplot):003:0> plot "sin(x)"
 require "numo/gnuplot"
 require "numo/narray"
 
+x = Numo::DFloat[0..100]/10
+y = Numo::NMath.sin(x)
+
 Numo.gnuplot do
-  x = Numo::DFloat[0..100]/10
-  y = Numo::NMath.sin(x)
   set title:"X-Y data plot"
   plot x,y, w:'lines', t:'sin(x)'
 end
 ```
 
-* Multiple data are separated with Hash or put in another Array.
+* Multiple data are separated by Hash or put into Array.
 ```ruby
 require 'numo/gnuplot'
 require 'numo/narray'
-DF = Numo::DFloat
 NM = Numo::NMath
 
+n = 60
+x = Numo::DFloat[-n..n]/n*10
+
 Numo.gnuplot do
-  n = 60
-  x = DF[-n..n]/n*10
   set title:"multiple data series"
+  # separate by Hash
   plot x,NM.sin(x), {w:'points',t:'sin(x)'}, x,x*NM.sin(x),{w:"lines",t:'x*sin(x)'}
+  # or separate into Array
+  # plot [x,NM.sin(x), w:'points',t:'sin(x)'], [x,x*NM.sin(x),w:"lines",t:'x*sin(x)']
+  # (here last item in each Array should be Hash in order to distinguish from array data)
   gets
 end
-
-Numo.gnuplot do
-  n = 60
-  x = DF[-n..n]/n*10
-  set title:"multiple data series"
-  plot [x,NM.sin(x), w:'points',t:'sin(x)'], [x,x*NM.sin(x),w:"lines",t:'x*sin(x)']
-  gets
-end
-
 ```
 
 * Plotting 2D arrays in 3D.
 ```ruby
-require './lib/numo/gnuplot'
+require 'numo/gnuplot'
 require 'numo/narray'
 
-Numo.gnuplot do
-  n = 60
-  x = (Numo::DFloat.new(1,n).seq/n-0.5)*30
-  y = (Numo::DFloat.new(n,1).seq/n-0.5)*30
-  r = Numo::NMath.sqrt(x**2+y**2) + 1e-10
-  z = Numo::NMath.sin(r)/r
+n = 60
+x = (Numo::DFloat.new(1,n).seq/n-0.5)*30
+y = (Numo::DFloat.new(n,1).seq/n-0.5)*30
+r = Numo::NMath.sqrt(x**2+y**2) + 1e-10
+z = Numo::NMath.sin(r)/r
 
+Numo.gnuplot do
   set title:'2D data plot'
   set dgrid3d:[60,60]
   splot z, w:'pm3d', t:'sin(r)/r'
