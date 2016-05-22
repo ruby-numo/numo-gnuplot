@@ -1,14 +1,11 @@
-require 'numo/gnuplot'
 require 'numo/narray'
-DF = Numo::DFloat
-NM = Numo::NMath
 
 # multiple data series plot (Hash separated)
+n = 60
+x = Numo::DFloat[-n..n]/n*10
+nm = Numo::NMath
 
 Numo.gnuplot do
-  n = 60
-  x = DF[-n..n]/n*10
   set title:"multiple data series plot"
-  plot x,NM.sin(x), {w:'points',t:'sin(x)'}, x,x*NM.sin(x),{w:"lines",t:'x*sin(x)'}
-  gets
+  plot x,nm.sin(x), {w:'points',t:'sin(x)'}, x,x*nm.sin(x),{w:"lines",t:'x*sin(x)'}
 end
