@@ -31,11 +31,13 @@ Or install it yourself as:
 ## Usage
 
 * All examples require to load Numo::Gnuplot class:
+
 ```ruby
 require "numo/gnuplot"
 ```
 
 * The first example showing how it works.
+
 ```ruby
 gp = Numo::Gnuplot.new
 gp.set title:"First Example"
@@ -43,6 +45,7 @@ gp.plot "sin(x)"
 ```
 
 * You can avoid receiver.
+
 ```ruby
 Numo::Gnuplot.new.instance_eval do
   set title:"Second Example"
@@ -51,6 +54,7 @@ end
 ```
 
 * The same thing in short.
+
 ```ruby
 Numo.gnuplot do
   set title:"Third Example"
@@ -59,14 +63,16 @@ end
 ```
 
 * Interactive plotting with IRB:
+
 ```
 $ irb -r numo/gnuplot
-irb(main):001:0> pushb Numo::Gnuplot.new
-irb(gnuplot):002:0> set title:"Forth Example"
+irb(main):001:0> pushb Numo.gnuplot
+irb(gnuplot):002:0> set t:"Forth Example"
 irb(gnuplot):003:0> plot "sin(x)"
 ```
 
 * Plotting X-Y data.
+
 ```ruby
 require "numo/gnuplot"
 
@@ -80,6 +86,7 @@ end
 ```
 
 * Plotting X-Y data in NArray.
+
 ```ruby
 require "numo/gnuplot"
 require "numo/narray"
@@ -94,6 +101,7 @@ end
 ```
 
 * Multiple data are separated by Hash or put into Array.
+
 ```ruby
 require 'numo/gnuplot'
 require 'numo/narray'
@@ -114,6 +122,7 @@ end
 ```
 
 * Plotting 2D arrays in 3D.
+
 ```ruby
 require 'numo/gnuplot'
 require 'numo/narray'
