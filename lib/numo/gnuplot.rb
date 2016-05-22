@@ -1,7 +1,11 @@
 module Numo
 
   def gnuplot(&block)
-    Gnuplot.default.instance_eval(&block)
+    if block
+      Gnuplot.default.instance_eval(&block)
+    else
+      Gnuplot.default
+    end
   end
   module_function :gnuplot
 
@@ -17,21 +21,23 @@ class Gnuplot
     POOL[0] ||= self.new
   end
 
-  def initialize
+  def initialize(gnuplot_command="gnuplot")
     @history = []
-    @iow = IO.popen("gnuplot 2>&1","w+")
+    @iow = IO.popen(gnuplot_command+" 2>&1","w+")
     @ior = @iow
     @gnuplot_version = send_cmd("print GPVAL_VERSION")[0].chomp
-    @debug = false
+    @debug = true
   end
 
   attr_reader :history
   attr_reader :gnuplot_version
 
+  # draw 2D functions and data.
   def plot(*args)
     _plot_splot("plot",args)
   end
 
+  # draws 2D projections of 3D surfaces and data.
   def splot(*args)
     _plot_splot("splot",args)
   end
@@ -46,14 +52,17 @@ class Gnuplot
   end
   private :_plot_splot
 
+  # replot is not recommended, use refresh
   def replot
     run "replot\n#{@last_data}"
   end
 
+  # The `set` command is used to set _lots_ of options.
   def set(*args)
     _set_unset("set",args)
   end
 
+  # The `unset` command is used to return to their default state.
   def unset(*args)
     _set_unset("unset",args)
   end
@@ -72,29 +81,80 @@ class Gnuplot
   end
   private :_set_unset
 
+  # The `help` command displays built-in help.
   def help(s=nil)
     puts send_cmd "help #{s}\n\n"
   end
 
+  # The `show` command shows their settings.
   def show(x)
     puts send_cmd "show #{x}"
   end
 
+  #  The `reset` command causes all graph-related options that can be
+  #  set with the `set` command to take on their default values.
   def reset(*args)
     args.each do |a|
       run "reset #{a}"
     end
   end
 
-  # gnuplot commands without argument
-  %w[
-    clear
-    exit
-    quit
-    refresh
-  ].each do |m|
-    define_method(m){run m}
+  # The `pause` command used to wait for events on window.
+  # Carriage return entry (-1 is given for argument) and
+  # text display option is disabled.
+  #    pause 10
+  #    pause 'mouse'
+  #    pause mouse:%w[keypress,button1,button2,button3,close,any]
+  def pause(*args)
+    send_cmd("pause #{OptsToS.new(*args)}").join.chomp
   end
+
+  # `var` returns Gnuplot variable (not Gnuplot command)
+  def var(name)
+    res = send_cmd("print #{name}").join("").chomp
+    if /undefined variable:/ =~ res
+      raise GnuplotError,res.strip
+    end
+    res
+  end
+
+  # The `load` command executes each line of the specified input file.
+  def load(filename)
+    send_cmd "load '#{filename}'"
+  end
+
+  # The `raise` command raises plot window(s)
+  def raise(plot_window_nb=nil)
+    send_cmd "raise #{plot_window_nb}"
+  end
+
+  # The `lower` command lowers plot window(s)
+  def lower(plot_window_nb=nil)
+    send_cmd "lower #{plot_window_nb}"
+  end
+
+  # The `clear` command erases the current screen or output device as specified
+  # by `set output`. This usually generates a formfeed on hardcopy devices.
+  def clear
+    send_cmd "clear"
+  end
+
+  # The `exit` and `quit` commands will exit `gnuplot`.
+  def exit
+    send_cmd "exit"
+  end
+
+  # The `exit` and `quit` commands will exit `gnuplot`.
+  def quit
+    send_cmd "quit"
+  end
+
+  # The `refresh` reformats and redraws the current plot using the
+  # data already read in.
+  def refresh
+    send_cmd "reflesh"
+  end
+
 
   #other_commands = %w[
   #  bind
@@ -105,12 +165,8 @@ class Gnuplot
   #  fit
   #  history
   #  if
-  #  load
-  #  lower
-  #  pause
   #  print
   #  pwd
-  #  raise
   #  reread
   #  save
   #  shell
@@ -136,19 +192,21 @@ class Gnuplot
       end
       raise GnuplotError,msg
     end
+    nil
   end
   private :run
 
   def send_cmd(s)
     puts "<"+s if @debug
     @iow.puts s
-    @iow.puts "print 'end_of_cmd'"
+    @iow.flush
+    @iow.puts "print '_end_of_cmd_'"
     @iow.flush
     @history << s
     res = []
     while line=@ior.gets
       puts ">"+line if @debug
-      break if /^end_of_cmd$/ =~ line
+      break if /^_end_of_cmd_$/ =~ line
       res << line
     end
     res # = res.chomp.strip
