@@ -1,5 +1,4 @@
-#require "numo/gnuplot"
-require "../lib/numo/gnuplot"
+require "numo/gnuplot"
 
 gp = Numo.gnuplot
 
