@@ -35,36 +35,41 @@ class Gnuplot
   # draw 2D functions and data.
   def plot(*args)
     _plot_splot("plot",args)
+    nil
   end
 
   # draws 2D projections of 3D surfaces and data.
   def splot(*args)
     _plot_splot("splot",args)
+    nil
   end
 
   def _plot_splot(cmd,args)
     contents = parse_plot_args(args)
     r = contents.shift.map{|x|"[#{x.begin}:#{x.end}] "}.join
     c = contents.map{|x| x.cmd_str}.join(",")
-    d = contents.map{|x| x.data_str}.join("")
+    d = contents.map{|x| x.data_str}.join
     run "#{cmd} #{r}#{c}\n#{d}"
-    @last_data = d
+    nil
   end
   private :_plot_splot
 
   # replot is not recommended, use refresh
   def replot
     run "replot\n#{@last_data}"
+    nil
   end
 
   # The `set` command is used to set _lots_ of options.
   def set(*args)
     _set_unset("set",args)
+    nil
   end
 
   # The `unset` command is used to return to their default state.
   def unset(*args)
     _set_unset("unset",args)
+    nil
   end
 
   def _set_unset(cmd,args)
@@ -78,6 +83,7 @@ class Gnuplot
         run "#{cmd} #{a}"
       end
     end
+    nil
   end
   private :_set_unset
 
@@ -97,6 +103,7 @@ class Gnuplot
     args.each do |a|
       run "reset #{a}"
     end
+    nil
   end
 
   # The `pause` command used to wait for events on window.
@@ -107,54 +114,75 @@ class Gnuplot
   #    pause mouse:%w[keypress,button1,button2,button3,close,any]
   def pause(*args)
     send_cmd("pause #{OptsToS.new(*args)}").join.chomp
-  end
-
-  # `var` returns Gnuplot variable (not Gnuplot command)
-  def var(name)
-    res = send_cmd("print #{name}").join("").chomp
-    if /undefined variable:/ =~ res
-      raise GnuplotError,res.strip
-    end
-    res
+    nil
   end
 
   # The `load` command executes each line of the specified input file.
   def load(filename)
     send_cmd "load '#{filename}'"
+    nil
   end
+
+  alias kernel_raise :raise
 
   # The `raise` command raises plot window(s)
-  def raise(plot_window_nb=nil)
+  def raise_plot(plot_window_nb=nil)
     send_cmd "raise #{plot_window_nb}"
+    nil
   end
+  alias raise :raise_plot
 
   # The `lower` command lowers plot window(s)
-  def lower(plot_window_nb=nil)
+  def lower_plot(plot_window_nb=nil)
     send_cmd "lower #{plot_window_nb}"
+    nil
   end
+  alias lower :lower_plot
 
   # The `clear` command erases the current screen or output device as specified
   # by `set output`. This usually generates a formfeed on hardcopy devices.
   def clear
     send_cmd "clear"
+    nil
   end
 
   # The `exit` and `quit` commands will exit `gnuplot`.
   def exit
     send_cmd "exit"
+    nil
   end
 
   # The `exit` and `quit` commands will exit `gnuplot`.
   def quit
     send_cmd "quit"
+    nil
   end
 
   # The `refresh` reformats and redraws the current plot using the
   # data already read in.
   def refresh
     send_cmd "reflesh"
+    nil
   end
 
+  # `var` returns Gnuplot variable (not Gnuplot command)
+  def var(name)
+    res = send_cmd("print #{name}").join("").chomp
+    if /undefined variable:/ =~ res
+      kernel_raise GnuplotError,res.strip
+    end
+    res
+  end
+
+  # turn on debug
+  def debug_on
+    @debug = true
+  end
+
+  # turn off debug
+  def debug_off
+    @debug = false
+  end
 
   #other_commands = %w[
   #  bind
@@ -190,7 +218,7 @@ class Gnuplot
       else
         msg = "\n"+res.join("")
       end
-      raise GnuplotError,msg
+      kernel_raise GnuplotError,msg
     end
     nil
   end
@@ -428,12 +456,12 @@ class Gnuplot
     def data_str
       parse_items
       if @function
-        ''
+        nil
       else
         if @matrix
           data2d_to_s(@data[0])+"\ne\n"
         else
-          data1d_to_s(*@data)+"e\n"
+          data1d_to_s(@data)+"e\n"
         end
       end
     end
@@ -446,7 +474,7 @@ class Gnuplot
       @data_format = s
     end
 
-    def data1d_to_s(*a)
+    def data1d_to_s(a)
       n = a.map{|e| e.size}.min
       f = ([data_format]*a.size).join(" ")+"\n"
       s = ""
