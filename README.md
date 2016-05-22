@@ -4,13 +4,12 @@
 * [GitHub site](https://github.com/masa16/numo-gnuplot)
 
 Although there are many [other Gnuplot interface libraries for Ruby](https://github.com/masa16/numo-gnuplot#related-work),
-they do not have such simple interface that
-the plot of x-y data is obtained by just typing:
+none of them have so simple interface as to obtain an XY data plot by just typing:
 
     plot x,y
 
 Numo::Gnuplot achieves this by providing only one class which has
-the same inteface with Gnuplot command line, and no other class which
+the same inteface as Gnuplot command line, and no other class which
 causes extra learning costs.
 
 ## Installation
@@ -67,7 +66,20 @@ irb(gnuplot):002:0> set title:"Forth Example"
 irb(gnuplot):003:0> plot "sin(x)"
 ```
 
-* Plotting X-Y data arrays.
+* Plotting X-Y data.
+```ruby
+require "numo/gnuplot"
+
+x = (0..100).map{|i| i*0.1}
+y = x.map{|i| Math.sin(i)}
+
+Numo.gnuplot do
+  set title:"X-Y data plot"
+  plot x,y, w:'lines', t:'sin(x)'
+end
+```
+
+* Plotting X-Y data in NArray.
 ```ruby
 require "numo/gnuplot"
 require "numo/narray"
@@ -76,7 +88,7 @@ x = Numo::DFloat[0..100]/10
 y = Numo::NMath.sin(x)
 
 Numo.gnuplot do
-  set title:"X-Y data plot"
+  set title:"X-Y data plot in Numo::NArray"
   plot x,y, w:'lines', t:'sin(x)'
 end
 ```
