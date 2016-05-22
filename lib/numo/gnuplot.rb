@@ -99,10 +99,8 @@ class Gnuplot
 
   #  The `reset` command causes all graph-related options that can be
   #  set with the `set` command to take on their default values.
-  def reset(*args)
-    args.each do |a|
-      run "reset #{a}"
-    end
+  def reset(x=nil)
+    run "reset #{x}"
     nil
   end
 
