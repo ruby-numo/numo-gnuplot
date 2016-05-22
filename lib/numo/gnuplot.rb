@@ -21,7 +21,7 @@ class Gnuplot
     @history = []
     @iow = IO.popen("gnuplot 2>&1","w+")
     @ior = @iow
-    @gnuplot_version = send_cmd("print GPVAL_VERSION")
+    @gnuplot_version = send_cmd("print GPVAL_VERSION")[0].chomp
     @debug = false
   end
 
@@ -44,6 +44,7 @@ class Gnuplot
     run "#{cmd} #{r}#{c}\n#{d}"
     @last_data = d
   end
+  private :_plot_splot
 
   def replot
     run "replot\n#{@last_data}"
@@ -69,6 +70,7 @@ class Gnuplot
       end
     end
   end
+  private :_set_unset
 
   def help(s=nil)
     puts send_cmd "help #{s}\n\n"
@@ -135,6 +137,7 @@ class Gnuplot
       raise GnuplotError,msg
     end
   end
+  private :run
 
   def send_cmd(s)
     puts "<"+s if @debug
@@ -150,43 +153,46 @@ class Gnuplot
     end
     res # = res.chomp.strip
   end
+  private :send_cmd
 
   def parse_plot_args(args)
-    contents = [[]]
-    content = PlotItem.new
-    contents << content
-    args.each do |a|
-      case a
+    list = [[]]
+    item = PlotItem.new
+    list << item
+    args.each do |arg|
+      case arg
       when Range
-        contents.first << a
+        list.first << arg
       when Array
-        if a.all?{|e| e.kind_of?(Range)}
-          contents.first.concat(a)
-        elsif PlotItem.is_data(a)
-          content << a
+        if arg.all?{|e| e.kind_of?(Range)}
+          list.first.concat(arg)
+        elsif PlotItem.is_data(arg)
+          item << arg
         else
-          if contents.last.empty?
-            contents.pop
+          if list.last.empty?
+            list.pop
           end
-          content = PlotItem.new(*a)
-          contents << content
+          item = PlotItem.new(*arg)
+          list << item
         end
       when Hash
-        content << a
-        content = PlotItem.new
-        contents << content
+        item << arg
+        item = PlotItem.new
+        list << item
       else
-        content << a
+        item << arg
       end
     end
-    if contents.last.empty?
-      contents.pop
+    if list.last.empty?
+      list.pop
     end
-    return contents
+    return list
   end
+  private :parse_plot_args
 
 
-  class OptsToS
+  # @private
+  class OptsToS # :nodoc: all
     def initialize(*opts)
       @opts = opts
     end
@@ -214,8 +220,8 @@ class Gnuplot
     end
   end
 
-
-  class KvItem
+  # @private
+  class KvItem # :nodoc: all
     NEED_QUOTE = %w[
       background
       cblabel
@@ -285,7 +291,8 @@ class Gnuplot
   end # KvItem
 
 
-  class PlotItem
+  # @private
+  class PlotItem # :nodoc: all
 
     def self.is_data(a)
       if a.kind_of? Array
