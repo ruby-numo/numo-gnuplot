@@ -26,7 +26,7 @@ class Gnuplot
     @iow = IO.popen(gnuplot_command+" 2>&1","w+")
     @ior = @iow
     @gnuplot_version = send_cmd("print GPVAL_VERSION")[0].chomp
-    @debug = true
+    @debug = false
   end
 
   attr_reader :history
