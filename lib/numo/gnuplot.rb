@@ -11,7 +11,7 @@ module Numo
 
 class Gnuplot
 
-  VERSION = "0.1.0"
+  VERSION = "0.1.1"
   POOL = []
   DATA_FORMAT = "%.5g"
 
@@ -159,7 +159,7 @@ class Gnuplot
   # The `refresh` reformats and redraws the current plot using the
   # data already read in.
   def refresh
-    send_cmd "reflesh"
+    send_cmd "refresh"
     nil
   end
 
@@ -171,6 +171,23 @@ class Gnuplot
     end
     res
   end
+
+  KNOWN_EXT = {"ps"=>"postscript","jpg"=>"jpeg"}
+
+  # output current plot to file with terminal setting from extension
+  # (not Gnuplot command)
+  def output(filename,*opts)
+    if /\.(\w+)$/ =~ filename
+      ext = $1
+      ext = KNOWN_EXT[ext]||ext
+      set terminal:[ext,*opts], output:filename
+      refresh
+      unset :terminal, :output
+    else
+      kernel_raise GnuplotError,"file extension is not given"
+    end
+  end
+
 
   # turn on debug
   def debug_on
