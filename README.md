@@ -28,6 +28,10 @@ Or install it yourself as:
 
     $ gem install numo-gnuplot
 
+## Demo page
+
+* [Ruby/Numo::Gnuplot Demo](https://github.com/ruby-numo/numo-gnuplot-demo)
+
 ## Usage
 
 * All examples require to load Numo::Gnuplot class:
