@@ -383,7 +383,11 @@ class Gnuplot
         when FalseClass
           nil
         when Array
-          "#{k} #{OptsToS.new(*v)}"
+          if /^#{k}/ =~ "using"
+            "#{k} #{v.join(':')}"
+          else
+            "#{k} #{OptsToS.new(*v)}"
+          end
         else
           "#{k} #{OptsToS.new(v)}"
         end
@@ -433,6 +437,12 @@ class Gnuplot
         elsif @items.first.kind_of? String
           @function = @items.first
           @options = @items[1..-1]
+          if (o=@items.last).kind_of? Hash
+            if o.any?{|k,v| /^#{k}/ =~ "using"}
+              # @function is data file
+              @function = "'#{@function}'"
+            end
+          end
         else
           @data = []
           @options = []
