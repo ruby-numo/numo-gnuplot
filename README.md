@@ -4,7 +4,7 @@
 * [GitHub site](https://github.com/masa16/numo-gnuplot)
 
 Although there are many [other Gnuplot interface libraries for Ruby](https://github.com/masa16/numo-gnuplot#related-work),
-none of them have so simple interface as to obtain an XY data plot by just typing:
+none of them have so simple interface as to show an XY data plot by just typing:
 
     plot x,y
 
@@ -48,7 +48,7 @@ gp.set title:"Example Plot"
 gp.plot "sin(x)",w:"lines"
 ```
 
-* You can avoid receiver.
+* You can omit receiver.
 
 ```ruby
 Numo::Gnuplot.new.instance_eval do
@@ -66,7 +66,7 @@ Numo.gnuplot do
 end
 ```
 
-* In this example, the following command lines are sent to Gnuplot.
+* In these examples, the following command lines are send to Gnuplot.
 
 ```
 set title "Example Plot"
