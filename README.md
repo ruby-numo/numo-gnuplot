@@ -44,16 +44,16 @@ require "numo/gnuplot"
 
 ```ruby
 gp = Numo::Gnuplot.new
-gp.set title:"First Example"
-gp.plot "sin(x)"
+gp.set title:"Example Plot"
+gp.plot "sin(x)",w:"lines"
 ```
 
 * You can avoid receiver.
 
 ```ruby
 Numo::Gnuplot.new.instance_eval do
-  set title:"Second Example"
-  plot "sin(x)"
+  set title:"Example Plot"
+  plot "sin(x)",w:"lines"
 end
 ```
 
@@ -61,9 +61,16 @@ end
 
 ```ruby
 Numo.gnuplot do
-  set title:"Third Example"
-  plot "sin(x)"
+  set title:"Example Plot"
+  plot "sin(x)",w:"lines"
 end
+```
+
+* In this example, the following command lines are sent to Gnuplot.
+
+```
+set title "Example Plot"
+plot sin(x) w lines
 ```
 
 * Interactive plotting with IRB:
@@ -71,8 +78,8 @@ end
 ```
 $ irb -r numo/gnuplot
 irb(main):001:0> pushb Numo.gnuplot
-irb(gnuplot):002:0> set t:"Forth Example"
-irb(gnuplot):003:0> plot "sin(x)"
+irb(gnuplot):002:0> set t:"Example Plot"
+irb(gnuplot):003:0> plot "sin(x)",w:"lines"
 ```
 
 * Plotting X-Y data.
