@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
 
   spec.summary       = %q{Gnuplot interface for Ruby.}
   spec.description   = %q{Gnuplot interface for Ruby with simple and similar inteface with Gnuplot.}
-  spec.homepage      = "https://github.com/masa16/numo-gnuplot"
+  spec.homepage      = "https://github.com/ruby-numo/gnuplot"
 
   # Prevent pushing this gem to RubyGems.org by setting 'allowed_push_host', or
   # delete this section to allow pushing this gem to any host.
