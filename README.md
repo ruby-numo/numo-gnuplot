@@ -125,9 +125,9 @@ x = Numo::DFloat[-n..n]/n*10
 
 Numo.gnuplot do
   set title:"multiple data series"
-  # separate by Hash
+  # place next data after option Hash
   plot x,NM.sin(x), {w:'points',t:'sin(x)'}, x,x*NM.sin(x),{w:"lines",t:'x*sin(x)'}
-  # or separate into Array
+  # or place data and options in Array
   # plot [x,NM.sin(x), w:'points',t:'sin(x)'], [x,x*NM.sin(x),w:"lines",t:'x*sin(x)']
   # (here last item in each Array should be Hash in order to distinguish from array data)
   gets
