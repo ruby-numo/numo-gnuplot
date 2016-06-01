@@ -25,7 +25,7 @@ class Gnuplot
     @history = []
     @debug = false
     unless system("which "+gnuplot_command)
-      raise GnuplotError,"Gnuplot command not found"
+      kernel_raise GnuplotError,"Gnuplot command not found"
     end
     @iow = IO.popen(gnuplot_command+" 2>&1","w+")
     @ior = @iow
