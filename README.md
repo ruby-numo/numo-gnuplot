@@ -163,4 +163,4 @@ end
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at
-https://github.com/[USERNAME]/numo-gnuplot.
+https://github.com/ruby-numo/gnuplot.
