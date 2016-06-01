@@ -23,13 +23,17 @@ class Gnuplot
 
   def initialize(gnuplot_command="gnuplot")
     @history = []
+    @debug = false
+    unless system("which "+gnuplot_command)
+      raise GnuplotError,"Gnuplot command not found"
+    end
     @iow = IO.popen(gnuplot_command+" 2>&1","w+")
     @ior = @iow
     @gnuplot_version = send_cmd("print GPVAL_VERSION")[0].chomp
-    @debug = false
   end
 
   attr_reader :history
+  attr_reader :last_message
   attr_reader :gnuplot_version
 
   # draw 2D functions and data.
@@ -246,13 +250,13 @@ class Gnuplot
     @iow.puts "print '_end_of_cmd_'"
     @iow.flush
     @history << s
-    res = []
+    @last_message = []
     while line=@ior.gets
       puts ">"+line if @debug
       break if /^_end_of_cmd_$/ =~ line
-      res << line
+      @last_message << line
     end
-    res # = res.chomp.strip
+    @last_message
   end
   private :send_cmd
 
