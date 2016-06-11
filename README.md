@@ -153,6 +153,42 @@ Numo.gnuplot do
 end
 ```
 
+## Gnuplot methods
+
+Numo::Gnuplot class methods succeeded from Gnuplot commands:
+
+* clear
+* exit
+* help(topic)
+* load(filename)
+* pause(*args)
+* plot(*args)
+* quit
+* reflesh
+* replot
+* reset(option)
+* set(*options)
+* show(option)
+* splot(*args)
+* unset(*options)
+
+Numo::Gnuplot class methods renamed from Gnuplot commands:
+
+* raise_plot(plot_window) -- 'raise' command
+* lower_plot(plot_window) -- 'lower' command
+
+Numo::Gnuplot-specific methods:
+
+* debug_off  -- turn off debug print
+* debug_on  -- turn on debug print
+* output(filename,*opts) -- output current plot to file. This invokes the next commands;
+```ruby
+set terminal:[ext,*opts], output:filename; refresh
+```
+* var(name) -- returns variable content in the Gnuplot context.
+
+See [API doc](http://www.rubydoc.info/gems/numo-gnuplot/Numo/Gnuplot) for more.
+
 ## Related Work
 
 * [Ruby Gnuplot](https://github.com/rdp/ruby_gnuplot/tree/master)
