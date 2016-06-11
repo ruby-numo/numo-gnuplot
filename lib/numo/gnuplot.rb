@@ -53,7 +53,7 @@ class Gnuplot
     r = contents.shift.map{|x|"[#{x.begin}:#{x.end}] "}.join
     c = contents.map{|x| x.cmd_str}.join(",")
     d = contents.map{|x| x.data_str}.join
-    run "#{cmd} #{r}#{c}\n#{d}"
+    run "#{cmd} #{r}#{c}", d
     nil
   end
   private :_plot_splot
@@ -229,8 +229,8 @@ class Gnuplot
     "gnuplot"
   end
 
-  def run(s)
-    res = send_cmd(s)
+  def run(s,data=nil)
+    res = send_cmd(s,data)
     if !res.empty?
       if res.size > 7
         msg = "\n"+res[0..5].join("")+" :\n"
@@ -243,9 +243,10 @@ class Gnuplot
   end
   private :run
 
-  def send_cmd(s)
+  def send_cmd(s,data=nil)
     puts "<"+s if @debug
     @iow.puts s
+    @iow.puts data
     @iow.flush
     @iow.puts "print '_end_of_cmd_'"
     @iow.flush
@@ -261,9 +262,8 @@ class Gnuplot
   private :send_cmd
 
   def parse_plot_args(args)
-    list = [[]]
-    item = PlotItem.new
-    list << item
+    list = [[],PlotItem.new] # first item is range
+    item = list.last
     args.each do |arg|
       case arg
       when Range
@@ -274,23 +274,17 @@ class Gnuplot
         elsif PlotItem.is_data(arg)
           item << arg
         else
-          if list.last.empty?
-            list.pop
-          end
-          item = PlotItem.new(*arg)
-          list << item
+          list.pop if list.last.empty?
+          list << item = PlotItem.new(*arg) # next PlotItem
         end
       when Hash
         item << arg
-        item = PlotItem.new
-        list << item
+        list << item = PlotItem.new # next PlotItem
       else
         item << arg
       end
     end
-    if list.last.empty?
-      list.pop
-    end
+    list.pop if list.last.empty?
     return list
   end
   private :parse_plot_args
