@@ -49,7 +49,7 @@ class Gnuplot
   end
 
   def _plot_splot(cmd,args)
-    contents = parse_plot_args(args)
+    contents = parse_plot_args(cmd,args)
     r = contents.shift.map{|x|"[#{x.begin}:#{x.end}] "}.join
     c = contents.map{|x| x.cmd_str}.join(",")
     d = contents.map{|x| x.data_str}.join
@@ -261,8 +261,9 @@ class Gnuplot
   end
   private :send_cmd
 
-  def parse_plot_args(args)
-    list = [[],PlotItem.new] # first item is range
+  def parse_plot_args(cmd,args)
+    cPlotItem = (cmd == "plot") ? PlotItem : SPlotItem
+    list = [[],cPlotItem.new] # first item is range
     item = list.last
     args.each do |arg|
       case arg
@@ -275,11 +276,11 @@ class Gnuplot
           item << arg
         else
           list.pop if list.last.empty?
-          list << item = PlotItem.new(*arg) # next PlotItem
+          list << item = cPlotItem.new(*arg) # next PlotItem
         end
       when Hash
         item << arg
-        list << item = PlotItem.new # next PlotItem
+        list << item = cPlotItem.new # next PlotItem
       else
         item << arg
       end
@@ -408,10 +409,10 @@ class Gnuplot
         end
       elsif defined?(Numo::NArray)
         return true if a.kind_of?(Numo::NArray)
-      elsif defined?(NArray)
-        return true if a.kind_of?(NArray)
-      elsif defined?(NMatrix)
-        return true if a.kind_of?(NMatix)
+      elsif defined?(::NArray)
+        return true if a.kind_of?(::NArray)
+      elsif defined?(::NMatrix)
+        return true if a.kind_of?(::NMatix)
       end
       false
     end
@@ -442,25 +443,22 @@ class Gnuplot
             end
           end
         else
-          @data = []
+          data = []
           @options = []
           @items.each do |x|
             if PlotItem.is_data(x)
-              @data << x
+              data << x
             else
               @options << x
             end
           end
-          if @data.size==1
-            a = @data[0]
-            if a.respond_to?(:shape)
-              if a.shape.size == 2
-                @matrix = true
-              end
-            end
-          end
+          @data = parse_data(data)
         end
       end
+    end
+
+    def parse_data(data)
+      PlotData.new(*data)
     end
 
     def cmd_str
@@ -468,11 +466,7 @@ class Gnuplot
       if @function
         "%s %s" % [@function, OptsToS.new(*@options)]
       else
-        if @matrix
-          "'-' matrix %s" % OptsToS.new(*@options)
-        else
-          "'-' %s" % OptsToS.new(*@options)
-        end
+        "%s %s" % [@data.cmd_str, OptsToS.new(*@options)]
       end
     end
 
@@ -481,38 +475,114 @@ class Gnuplot
       if @function
         nil
       else
-        if @matrix
-          data2d_to_s(@data[0])+"\ne\n"
-        else
-          data1d_to_s(@data)+"e\n"
-        end
+        @data.data_str
       end
     end
 
+  end # PlotItem
+
+
+  # @private
+  class SPlotItem < PlotItem  # :nodoc: all
+    def parse_data(data)
+      if data.size == 1
+        if data[0].respond_to?(:shape)
+          SPlotArray.new(*data)
+        else
+          PlotData.new(*data)
+        end
+      else
+        SPlotRecord.new(*data)
+      end
+    end
+  end
+
+
+  # @private
+  class PlotData  # :nodoc: all
     def data_format
       @data_format || DATA_FORMAT
     end
 
-    def data_format=(s)
-      @data_format = s
+    def initialize(*data)
+      @data = data.map{|a| a.flatten}
+      @n = @data.map{|a| a.size}.min
+      @text = false
     end
 
-    def data1d_to_s(a)
-      n = a.map{|e| e.size}.min
-      f = ([data_format]*a.size).join(" ")+"\n"
-      s = ""
-      n.times{|i| s << f % a.map{|e| e[i]}}
-      s
-    end
-
-    def data2d_to_s(a)
-      f = data_format
-      s = ""
-      a.to_a.each do |b|
-        s << b.map{|e| f%e}.join(" ")+"\n"
+    def cmd_str
+      if @text
+        "'-'"
+      else
+        "'-' binary record=#{@n} format='%float64'"
       end
-      s
     end
-  end # PlotItem
+
+    def data_str
+      if @text
+        f = ([data_format]*@data.size).join(" ")+"\n"
+        s = ""
+        @n.times{|i| s << f % @data.map{|a| a[i]}}
+        s+"\ne"
+      elsif defined? Numo::NArray
+        m = @data.size
+        x = Numo::DFloat.zeros(@n,m)
+        m.times{|i| x[true,i] = @data[i][0...@n]}
+        x.to_string
+      else
+        s = []
+        @n.times{|i| s.concat @data.map{|a| a[i]}}
+        s.pack("d*")
+      end
+    end
+  end
+
+  # @private
+  class SPlotRecord < PlotData  # :nodoc: all
+    def initialize(*data)
+      @shape = data.last.shape
+      super
+    end
+
+    def cmd_str
+      if @text
+        "'-'"
+      else
+        "'-' binary record=(#{@shape[1]},#{@shape[0]}) format='%float64' using 1:2:3"
+      end
+    end
+  end
+
+  # @private
+  class SPlotArray < PlotData  # :nodoc: all
+    def initialize(data)
+      @data = data
+    end
+
+    def cmd_str
+      if @text
+        "'-' matrix"
+      else
+        s = @data.shape
+        "'-' binary array=(#{s[1]},#{s[0]}) format='%float64'"
+      end
+    end
+
+    def data_str
+      if @text
+        f = data_format
+        s = ""
+        a.each do |b|
+          s << b.map{|e| f%e}.join(" ")+"\n"
+        end
+        s+"\ne"
+      elsif defined? Numo::NArray
+        Numo::DFloat.cast(@data).to_string
+      else
+        @data.to_a.flatten.pack("d*")
+      end
+    end
+  end
+
 end # Numo::Gnuplot
 end
