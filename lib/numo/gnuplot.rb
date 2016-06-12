@@ -11,7 +11,7 @@ module Numo
 
 class Gnuplot
 
-  VERSION = "0.1.2"
+  VERSION = "0.1.3"
   POOL = []
   DATA_FORMAT = "%.5g"
 
@@ -24,12 +24,19 @@ class Gnuplot
   def initialize(gnuplot_command="gnuplot")
     @history = []
     @debug = false
-    unless system("which "+gnuplot_command)
-      kernel_raise GnuplotError,"Gnuplot command not found"
-    end
-    @iow = IO.popen(gnuplot_command+" 2>&1","w+")
-    @ior = @iow
+    r0,@iow = IO.pipe
+    @ior,w2 = IO.pipe
+    IO.popen(gnuplot_command,:in=>r0,:err=>w2)
+    r0.close
+    w2.close
     @gnuplot_version = send_cmd("print GPVAL_VERSION")[0].chomp
+    if /\.(\w+)$/ =~ (filename = ENV['NUMO_GNUPLOT_OUTPUT'])
+      ext = $1
+      ext = KNOWN_EXT[ext] || ext
+      opts = ENV['NUMO_GNUPLOT_OPTION'] || ''
+      set terminal:[ext,opts]
+      set output:filename
+    end
   end
 
   attr_reader :history
