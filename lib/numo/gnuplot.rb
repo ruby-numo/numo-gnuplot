@@ -542,20 +542,65 @@ class Gnuplot
         s.pack("d*")
       end
     end
+
+    def self.array_shape(a)
+      if a.kind_of?(Array)
+        is_2d = true
+        is_1d = true
+        size_min = nil
+        a.each do |b|
+          if b.kind_of?(Array)
+            is_1d = false
+            if b.any?{|c| c.kind_of?(Array)}
+              is_2d = false
+            elsif size_min.nil? || b.size < size_min
+              size_min = b.size
+            end
+          else
+            is_2d = false
+          end
+          break if !is_1d && !is_2d
+        end
+        if is_1d
+          [a.size]
+        elsif is_2d
+          [a.size, size_min]
+        else
+          kernel_raise GnuplotError, "not suitable Array for data"
+        end
+      elsif a.respond_to?(:shape)
+        a.shape
+      else
+        kernel_raise GnuplotError, "not suitable type for data"
+      end
+    end
   end
 
   # @private
   class SPlotRecord < PlotData  # :nodoc: all
-    def initialize(*data)
-      @shape = data.last.shape
-      super
+
+    def initialize(x,y,z)
+      @text = false
+      @data = [x,y,z].map{|a| a.flatten}
+      @n = @data.map{|a| a.size}.min
+      shape = PlotData.array_shape(z)
+      if shape.size >= 2
+        n = shape[1]*shape[0]
+        if @n < n
+          kernel_raise GnuplotError, "data size mismatch"
+        end
+        @n = n
+        @record = "#{shape[1]},#{shape[0]}"
+      else
+        @record = "#{@n}"
+      end
     end
 
     def cmd_str
       if @text
         "'-'"
       else
-        "'-' binary record=(#{@shape[1]},#{@shape[0]}) format='%float64' using 1:2:3"
+        "'-' binary record=(#{@record}) format='%float64' using 1:2:3"
       end
     end
   end
