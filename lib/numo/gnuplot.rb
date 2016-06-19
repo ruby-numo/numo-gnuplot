@@ -11,7 +11,7 @@ module Numo
 
 class Gnuplot
 
-  VERSION = "0.1.3"
+  VERSION = "0.1.4"
   POOL = []
   DATA_FORMAT = "%.5g"
 
@@ -120,7 +120,7 @@ class Gnuplot
   # text display option is disabled.
   #    pause 10
   #    pause 'mouse'
-  #    pause mouse:%w[keypress,button1,button2,button3,close,any]
+  #    pause mouse:%w[keypress button1 button2 button3 close any]
   def pause(*args)
     send_cmd("pause #{OptsToS.new(*args)}").join.chomp
     nil
