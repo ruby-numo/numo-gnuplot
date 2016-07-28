@@ -419,7 +419,7 @@ class Gnuplot
       elsif defined?(::NArray)
         return true if a.kind_of?(::NArray)
       elsif defined?(::NMatrix)
-        return true if a.kind_of?(::NMatix)
+        return true if a.kind_of?(::NMatrix)
       end
       false
     end
