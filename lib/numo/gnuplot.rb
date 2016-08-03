@@ -13,7 +13,7 @@ class Gnuplot
 
   VERSION = "0.1.4"
   POOL = []
-  DATA_FORMAT = "%.5g"
+  DATA_FORMAT = "%.7g"
 
   class GnuplotError < StandardError; end
 
@@ -514,7 +514,7 @@ class Gnuplot
     def initialize(*data)
       @data = data.map{|a| a.flatten}
       @n = @data.map{|a| a.size}.min
-      @text = false
+      @text = true
     end
 
     def cmd_str
@@ -527,10 +527,9 @@ class Gnuplot
 
     def data_str
       if @text
-        f = ([data_format]*@data.size).join(" ")+"\n"
         s = ""
-        @n.times{|i| s << f % @data.map{|a| a[i]}}
-        s+"\ne"
+        @n.times{|i| s << line_str(i)+"\n"}
+        s + "e"
       elsif defined? Numo::NArray
         m = @data.size
         x = Numo::DFloat.zeros(@n,m)
@@ -541,6 +540,26 @@ class Gnuplot
         @n.times{|i| s.concat @data.map{|a| a[i]}}
         s.pack("d*")
       end
+    end
+
+    def line_str(i)
+      @data.map do |a|
+        v = a[i]
+        case v
+        when Float,Rational
+          s = data_format % v
+        when Numeric
+          s = v.to_s
+        else
+          s = v.to_s
+          if /"/ =~ s
+            kernel_raise GnuplotError,"should not include double quotation in data"
+          elsif / / =~ s
+            s = '"'+s+'"'
+          end
+        end
+        s
+      end.join(" ")
     end
 
     def self.array_shape(a)
