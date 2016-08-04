@@ -9,6 +9,11 @@ module Numo
   end
   module_function :gnuplot
 
+  def noteplot(&block)
+    Gnuplot::NotePlot.new(&block)
+  end
+  module_function :noteplot
+
 class Gnuplot
 
   VERSION = "0.1.5"
@@ -19,6 +24,29 @@ class Gnuplot
 
   def self.default
     POOL[0] ||= self.new
+  end
+
+  class NotePlot
+    def initialize(&block)
+      if block.nil?
+        raise ArgumentError,"block is needed"
+      end
+      @block = block
+    end
+
+    def to_iruby
+      require 'tempfile'
+      tempfile_svg = Tempfile.open('plot')
+      # output SVG to tmpfile
+      gp = Gnuplot.default
+      gp.reset
+      gp.set terminal:'svg', output:tempfile_svg.path
+      gp.instance_eval(&@block)
+      gp.unset 'output'
+      svg = File.read(tempfile_svg.path)
+      tempfile_svg.close
+      ["image/svg+xml",svg]
+    end
   end
 
   def initialize(gnuplot_command="gnuplot")
