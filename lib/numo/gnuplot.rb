@@ -582,7 +582,7 @@ class Gnuplot
           s = v.to_s
           if /"/ =~ s
             kernel_raise GnuplotError,"should not include double quotation in data"
-          elsif / / =~ s
+          else
             s = '"'+s+'"'
           end
         end
