@@ -153,6 +153,25 @@ Numo.gnuplot do
 end
 ```
 
+### IRuby
+Numo::Gnuplot is compatible with [IRuby](https://github.com/SciRuby/iruby/).
+
+* Embedding a plot into iRuby Notebook.
+
+```ruby
+Numo::Gnuplot::NotePlot.new do
+  plot "sin(x)"
+end
+```
+
+* The same thing in short.
+
+```ruby
+Numo.noteplot do
+  plot "sin(x)"
+end
+```
+
 ## Gnuplot methods
 
 Numo::Gnuplot class methods succeeded from Gnuplot commands:
