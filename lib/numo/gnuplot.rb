@@ -381,6 +381,13 @@ class Gnuplot
       y2label
       ylabel
       zlabel
+      cb
+      x
+      xy
+      x2
+      y
+      y2
+      z
     ].map{|x| x.to_sym}
 
     def initialize(k,v)
@@ -402,9 +409,11 @@ class Gnuplot
       if need_quote?(k)
         case v
         when String
-          "#{k} #{v.inspect}"
+          "#{k.to_s.sub(/_/,' ')} #{v.inspect}"
         when Array
           "#{k} #{v[0].inspect} #{OptsToS.new(*v[1..-1])}"
+        else
+          "#{k} #{OptsToS.new(v)}"
         end
       else
         case v
@@ -427,6 +436,7 @@ class Gnuplot
         end
       end
     end
+
   end # KvItem
 
 
