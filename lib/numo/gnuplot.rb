@@ -402,9 +402,9 @@ class Gnuplot
       when :at
         case v
         when String
-          "#{k} #{v.inspect}"
+          "#{k} #{v}" # not quote
         when Array
-          "#{k} #{v.map{|x| x.inspect}.join(",")}"
+          "#{k} #{v.map{|x|(x.kind_of? String) ? x.inspect : x.to_s}.join(",")}"
         else
           "#{k} #{parse(v)}"
         end
