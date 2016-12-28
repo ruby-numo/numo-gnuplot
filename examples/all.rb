@@ -1,5 +1,5 @@
-#require "numo/gnuplot"
-require_relative "../lib/numo/gnuplot"
+require "numo/gnuplot"
+#require_relative "../lib/numo/gnuplot"
 
 gp = Numo.gnuplot
 #gp.debug_on
