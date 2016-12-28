@@ -116,7 +116,7 @@ class Gnuplot
       case a
       when Hash
         a.each do |k,v|
-          run "#{cmd} #{KvItem.new(k,v)}"
+          run "#{cmd} #{OptArg.parse_kv(k,v)}"
         end
       else
         run "#{cmd} #{a}"
@@ -150,7 +150,7 @@ class Gnuplot
   #    pause 'mouse'
   #    pause mouse:%w[keypress button1 button2 button3 close any]
   def pause(*args)
-    send_cmd("pause #{OptsToS.new(*args)}").join.chomp
+    send_cmd("pause #{OptArg.parse(*args)}").join.chomp
     nil
   end
 
@@ -264,6 +264,8 @@ class Gnuplot
     "gnuplot"
   end
 
+  # private methods
+
   def run(s,data=nil)
     res = send_cmd(s,data)
     if !res.empty?
@@ -327,25 +329,19 @@ class Gnuplot
 
 
   # @private
-  class OptsToS # :nodoc: all
-    def initialize(*opts)
-      @opts = opts
-    end
+  module OptArg # :nodoc: all
 
-    def to_s
-      opts_to_s(*@opts)
-    end
+    module_function
 
-    def opts_to_s(*opts)
-      #p opts
+    def parse(*opts)
       sep = ","
       opts.map do |opt|
         sep = " " if !opt.kind_of?(Numeric)
         case opt
         when Array
-          opt.map{|v| "#{opts_to_s(*v)}"}.join(sep)
+          opt.map{|v| "#{parse(*v)}"}.join(sep)
         when Hash
-          opt.map{|k,v| KvItem.new(k,v).to_s}.compact.join(" ")
+          opt.map{|k,v| parse_kv(k,v)}.compact.join(" ")
         when Range
           "[#{opt.begin}:#{opt.end}]"
         else
@@ -353,10 +349,6 @@ class Gnuplot
         end
       end.join(sep)
     end
-  end
-
-  # @private
-  class KvItem # :nodoc: all
 
     NEED_QUOTE = %w[
       background
@@ -405,16 +397,7 @@ class Gnuplot
       any?{|q| re =~ q}
     end
 
-    def initialize(k,v)
-      @k = k
-      @v = v
-    end
-
-    def to_s
-      kv_to_s(@k,@v)
-    end
-
-    def kv_to_s(k,v)
+    def parse_kv(k,v)
       case k.to_sym
       when :at
         case v
@@ -423,7 +406,7 @@ class Gnuplot
         when Array
           "#{k} #{v.map{|x| x.inspect}.join(",")}"
         else
-          "#{k} #{OptsToS.new(v)}"
+          "#{k} #{parse(v)}"
         end
       when :label
         case v
@@ -431,23 +414,23 @@ class Gnuplot
           "#{k} #{v.inspect}"
         when Array
           if v[0].kind_of?(Integer) && v[1].kind_of?(String)
-            "#{k} #{OptsToS.new(v[0],v[1].inspect,*v[2..-1])}"
+            "#{k} #{parse(v[0],v[1].inspect,*v[2..-1])}"
           elsif v[0].kind_of?(String)
-            "#{k} #{OptsToS.new(v[0].inspect,*v[1..-1])}"
+            "#{k} #{parse(v[0].inspect,*v[1..-1])}"
           else
-            "#{k} #{OptsToS.new(*v)}"
+            "#{k} #{parse(*v)}"
           end
         else
-          "#{k} #{OptsToS.new(v)}"
+          "#{k} #{parse(v)}"
         end
       when NEED_QUOTE
         case v
         when String
           "#{k.to_s.sub(/_/,' ')} #{v.inspect}"
         when Array
-          "#{k} #{v[0].inspect} #{OptsToS.new(*v[1..-1])}"
+          "#{k} #{v[0].inspect} #{parse(*v[1..-1])}"
         else
-          "#{k} #{OptsToS.new(v)}"
+          "#{k} #{parse(v)}"
         end
       else
         case v
@@ -463,15 +446,15 @@ class Gnuplot
           if /^#{k}/ =~ "using"
             "#{k} #{v.join(':')}"
           else
-            "#{k} #{OptsToS.new(*v)}"
+            "#{k} #{parse(*v)}"
           end
         else
-          "#{k} #{OptsToS.new(v)}"
+          "#{k} #{parse(v)}"
         end
       end
     end
 
-  end # KvItem
+  end # OptArg
 
 
   # @private
@@ -543,9 +526,9 @@ class Gnuplot
     def cmd_str
       parse_items
       if @function
-        "%s %s" % [@function, OptsToS.new(*@options)]
+        "%s %s" % [@function, OptArg.parse(*@options)]
       else
-        "%s %s" % [@data.cmd_str, OptsToS.new(*@options)]
+        "%s %s" % [@data.cmd_str, OptArg.parse(*@options)]
       end
     end
 
