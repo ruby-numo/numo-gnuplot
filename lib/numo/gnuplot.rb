@@ -357,13 +357,17 @@ class Gnuplot
 
   # @private
   class KvItem # :nodoc: all
+
     NEED_QUOTE = %w[
       background
       cblabel
       clabel
+      commentschars
       dashtype
+      decimalsign
       dt
       font
+      fontpath
       format
       format_cb
       format_x
@@ -372,8 +376,14 @@ class Gnuplot
       format_y
       format_y2
       format_z
+      locale
+      logfile
+      missing
       output
+      print
       rgb
+      separator
+      table
       timefmt
       title
       x2label
@@ -388,17 +398,16 @@ class Gnuplot
       y
       y2
       z
-    ].map{|x| x.to_sym}
+    ]
+
+    def NEED_QUOTE.===(k)
+      re = /^#{k}/
+      any?{|q| re =~ q}
+    end
 
     def initialize(k,v)
       @k = k
       @v = v
-    end
-
-    def need_quote?(k)
-      NEED_QUOTE.any? do |q|
-        /^#{k}/ =~ q
-      end
     end
 
     def to_s
@@ -406,7 +415,32 @@ class Gnuplot
     end
 
     def kv_to_s(k,v)
-      if need_quote?(k)
+      case k.to_sym
+      when :at
+        case v
+        when String
+          "#{k} #{v.inspect}"
+        when Array
+          "#{k} #{v.map{|x| x.inspect}.join(",")}"
+        else
+          "#{k} #{OptsToS.new(v)}"
+        end
+      when :label
+        case v
+        when String
+          "#{k} #{v.inspect}"
+        when Array
+          if v[0].kind_of?(Integer) && v[1].kind_of?(String)
+            "#{k} #{OptsToS.new(v[0],v[1].inspect,*v[2..-1])}"
+          elsif v[0].kind_of?(String)
+            "#{k} #{OptsToS.new(v[0].inspect,*v[1..-1])}"
+          else
+            "#{k} #{OptsToS.new(*v)}"
+          end
+        else
+          "#{k} #{OptsToS.new(v)}"
+        end
+      when NEED_QUOTE
         case v
         when String
           "#{k.to_s.sub(/_/,' ')} #{v.inspect}"
