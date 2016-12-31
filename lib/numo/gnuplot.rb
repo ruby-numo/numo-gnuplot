@@ -73,19 +73,20 @@ class Gnuplot
 
   # draw 2D functions and data.
   def plot(*args)
-    _plot_splot("plot",args)
+    contents = parse_plot_args(PlotItem,args)
+    _plot_splot("plot",contents)
     nil
   end
 
   # draws 2D projections of 3D surfaces and data.
   def splot(*args)
-    _plot_splot("splot",args)
+    contents = parse_plot_args(SPlotItem,args)
+    _plot_splot("splot",contents)
     nil
   end
 
-  def _plot_splot(cmd,args)
-    contents = parse_plot_args(cmd,args)
-    r = contents.shift.map{|x|"[#{x.begin}:#{x.end}] "}.join
+  def _plot_splot(cmd,contents)
+    r = contents.shift.map{|x| "#{x} "}.join
     c = contents.map{|x| x.cmd_str}.join(",")
     d = contents.map{|x| x.data_str}.join
     run "#{cmd} #{r}#{c}", d
@@ -298,17 +299,31 @@ class Gnuplot
   end
   private :send_cmd
 
-  def parse_plot_args(cmd,args)
-    cPlotItem = (cmd == "plot") ? PlotItem : SPlotItem
-    list = [[],cPlotItem.new] # first item is range
-    item = list.last
+  def parse_plot_args(cPlotItem,args)
+    range = []
+    while !args.empty?
+      case a = args.first
+      when Range
+        range << range_to_s(args.shift)
+      when String
+        if /^\[.*\]$/ =~ a
+          range << args.shift
+        else
+          break
+        end
+      else
+        break
+      end
+    end
+    item = cPlotItem.new # first item is range
+    list = [range,item]
     args.each do |arg|
       case arg
       when Range
-        list.first << arg
+        list.first << range_to_s(arg)
       when Array
         if arg.all?{|e| e.kind_of?(Range)}
-          list.first.concat(arg)
+          arg.each{|e| list.first << range_to_s(e)}
         elsif PlotItem.is_data(arg)
           item << arg
         else
@@ -318,6 +333,9 @@ class Gnuplot
       when Hash
         item << arg
         list << item = cPlotItem.new # next PlotItem
+      when String
+        list.pop if list.last.empty?
+        list << item = cPlotItem.new(arg) # next PlotItem
       else
         item << arg
       end
@@ -326,6 +344,19 @@ class Gnuplot
     return list
   end
   private :parse_plot_args
+
+  def range_to_s(*a)
+    case a.size
+    when 1
+      a = a[0]
+      "[#{a.first}:#{a.last}]"
+    when 2
+      "[#{a[0]}:#{a[1]}]"
+    else
+      raise ArgumetError,"wrong number of argument"
+    end
+  end
+  private :range_to_s
 
 
   # @private
