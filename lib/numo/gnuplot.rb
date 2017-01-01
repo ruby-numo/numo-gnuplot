@@ -102,30 +102,15 @@ class Gnuplot
 
   # The `set` command is used to set _lots_ of options.
   def set(*args)
-    _set_unset("set",args)
+    run "set #{OptArg.parse(*args)}"
     nil
   end
 
   # The `unset` command is used to return to their default state.
   def unset(*args)
-    _set_unset("unset",args)
+    run "unset #{OptArg.parse(*args)}"
     nil
   end
-
-  def _set_unset(cmd,args)
-    args.each do |a|
-      case a
-      when Hash
-        a.each do |k,v|
-          run "#{cmd} #{OptArg.parse_kv(k,v)}"
-        end
-      else
-        run "#{cmd} #{a}"
-      end
-    end
-    nil
-  end
-  private :_set_unset
 
   # The `help` command displays built-in help.
   def help(s=nil)
@@ -365,16 +350,27 @@ class Gnuplot
     module_function
 
     def parse(*opts)
+      nq  = false
       sep = ","
       opts.map do |opt|
         sep = " " if !opt.kind_of?(Numeric)
         case opt
         when Array
-          opt.map{|v| "#{parse(*v)}"}.join(sep)
+          parse(*opt)
         when Hash
           opt.map{|k,v| parse_kv(k,v)}.compact.join(" ")
         when Range
           "[#{opt.begin}:#{opt.end}]"
+        when Symbol
+          nq = true if NEED_QUOTE===opt
+          opt.to_s.tr('_',' ')
+        when String
+          if nq
+            nq = false
+            "'#{opt}'"
+          else
+            opt
+          end
         else
           opt.to_s
         end
@@ -428,8 +424,9 @@ class Gnuplot
       any?{|q| re =~ q}
     end
 
-    def parse_kv(k,v)
-      case k.to_sym
+    def parse_kv(s,v)
+      k = s.to_s.gsub(/_/,' ')
+      case s.to_sym
       when :at
         case v
         when String
@@ -457,9 +454,22 @@ class Gnuplot
       when NEED_QUOTE
         case v
         when String
-          "#{k.to_s.sub(/_/,' ')} #{v.inspect}"
+          "#{k} #{v.inspect}"
+        when TrueClass
+          k
+        when NilClass
+          nil
+        when FalseClass
+          nil
         when Array
-          "#{k} #{v[0].inspect} #{parse(*v[1..-1])}"
+          case v.size
+          when 0
+            k
+          when 1
+            "#{k} #{v[0].inspect}"
+          else
+            "#{k} #{v[0].inspect} #{parse(*v[1..-1])}"
+          end
         else
           "#{k} #{parse(v)}"
         end
@@ -468,7 +478,7 @@ class Gnuplot
         when String
           "#{k} #{v}"
         when TrueClass
-          "#{k}"
+          k
         when NilClass
           nil
         when FalseClass
@@ -476,6 +486,8 @@ class Gnuplot
         when Array
           if /^#{k}/ =~ "using"
             "#{k} #{v.join(':')}"
+          elsif v.empty?
+            k
           else
             "#{k} #{parse(*v)}"
           end
@@ -532,7 +544,9 @@ class Gnuplot
           if (o=@items.last).kind_of? Hash
             if o.any?{|k,v| /^#{k}/ =~ "using"}
               # @function is data file
-              @function = "'#{@function}'"
+              if /^'.*'$/ !~ @function && /^".*"$/ !~ @function
+                @function = "'#{@function}'"
+              end
             end
           end
         else
