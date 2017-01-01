@@ -12,11 +12,11 @@ x += df.zeros(n,1)
 y += df.zeros(1,n)
 
 Numo.gnuplot do
-  set title:'3D plot of XYZ data',
-      palette:{rgbformula:[22,13,-31]},
-      dgrid3d:[60,60],
-      xlabel:'x',
-      ylabel:'y',
-      zlabel:'sin(r)/r'
+  set title:'3D plot of XYZ data'
+  set palette:{rgbformula:[22,13,-31]}
+  set dgrid3d:[60,60]
+  set xlabel:'x'
+  set ylabel:'y'
+  set zlabel:'sin(r)/r'
   splot x,y,z, w:'pm3d', t:'sin(r)/r'
 end
