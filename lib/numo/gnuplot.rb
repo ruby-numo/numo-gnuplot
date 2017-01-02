@@ -224,6 +224,10 @@ class Gnuplot
     @debug = false
   end
 
+  def send(cmd)
+    send_cmd(cmd)
+  end
+
   #other_commands = %w[
   #  bind
   #  call
@@ -398,6 +402,7 @@ class Gnuplot
       locale
       logfile
       missing
+      newhistogram
       output
       print
       rgb
@@ -559,7 +564,11 @@ class Gnuplot
               @options << x
             end
           end
-          @data = parse_data(data)
+          if data.empty?
+            @function = ''
+          else
+            @data = parse_data(data)
+          end
         end
       end
     end
@@ -612,6 +621,9 @@ class Gnuplot
     end
 
     def initialize(*data)
+      if data.empty?
+        raise ArgumentError,"no data"
+      end
       @data = data.map{|a| a.flatten}
       @n = @data.map{|a| a.size}.min
       @text = true
