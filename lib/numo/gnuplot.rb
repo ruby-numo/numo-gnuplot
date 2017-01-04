@@ -388,17 +388,8 @@ class Gnuplot
       commentschars
       dashtype
       decimalsign
-      dt
-      font
       fontpath
       format
-      format_cb
-      format_x
-      format_x2
-      format_xy
-      format_y
-      format_y2
-      format_z
       locale
       logfile
       missing
@@ -415,16 +406,10 @@ class Gnuplot
       y2label
       ylabel
       zlabel
-      cb
-      x
-      xy
-      x2
-      y
-      y2
-      z
     ]
 
     def NEED_QUOTE.===(k)
+      k = $1 if /_([^_]+)$/ =~ k
       re = /^#{k}/
       any?{|q| re =~ q}
     end
