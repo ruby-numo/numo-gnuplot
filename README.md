@@ -4,6 +4,7 @@
 * [GitHub site](https://github.com/ruby-numo/gnuplot)
 * [RubyGems site](https://rubygems.org/gems/numo-gnuplot)
 * [API doc](http://www.rubydoc.info/gems/numo-gnuplot/Numo/Gnuplot)
+* [Demo page](https://github.com/ruby-numo/numo-gnuplot-demo)
 
 Although there are many [other Gnuplot interface libraries for Ruby](https://github.com/ruby-numo/gnuplot#related-work),
 none of them have so simple interface as to show an XY data plot by just typing:
@@ -200,10 +201,12 @@ Numo::Gnuplot-specific methods:
 
 * debug_off  -- turn off debug print
 * debug_on  -- turn on debug print
-* output(filename,*opts) -- output current plot to file. This invokes the next commands;
+* output(filename,[term,*opts]) -- output current plot to file. This invokes the next commands;
 ```ruby
-set terminal:[ext,*opts], output:filename; refresh
+set terminal:[term,*opts]
+set output:filename; refresh
 ```
+  If term is omitted, extension in filename is regarded as term name.
 * var(name) -- returns variable content in the Gnuplot context.
 
 See [API doc](http://www.rubydoc.info/gems/numo-gnuplot/Numo/Gnuplot) for more.
