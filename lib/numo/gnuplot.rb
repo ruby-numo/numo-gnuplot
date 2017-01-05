@@ -27,6 +27,7 @@ class Gnuplot
   end
 
   class NotePlot
+
     def initialize(&block)
       if block.nil?
         raise ArgumentError,"block is needed"
@@ -354,31 +355,39 @@ class Gnuplot
     module_function
 
     def parse(*opts)
-      nq  = false
       sep = ","
-      opts.map do |opt|
-        sep = " " if !opt.kind_of?(Numeric)
-        case opt
-        when Array
-          parse(*opt)
-        when Hash
-          opt.map{|k,v| parse_kv(k,v)}.compact.join(" ")
-        when Range
-          "[#{opt.begin}:#{opt.end}]"
-        when Symbol
-          nq = true if NEED_QUOTE===opt
-          opt.to_s.tr('_',' ')
-        when String
-          if nq
-            nq = false
-            "'#{opt}'"
-          else
-            opt
-          end
-        else
-          opt.to_s
+      a = []
+      while opt = opts.shift
+        if !opt.kind_of?(Numeric)
+          sep = " "
         end
-      end.join(sep)
+        case opt
+        when Symbol
+          a << opt.to_s.tr('_',' ')
+          case opt
+          when :label
+            if opts.first.kind_of?(Integer)
+              a << opts.shift.to_s
+            end
+            if opts.first.kind_of?(String)
+              a << "'#{opts.shift}'"
+            end
+          when NEED_QUOTE
+            if opts.first.kind_of?(String)
+              a << "'#{opts.shift}'"
+            end
+          end
+        when Array
+          a << parse(*opt)
+        when Hash
+          a << opt.map{|k,v| parse_kv(k,v)}.compact.join(" ")
+        when Range
+          a << "[#{opt.begin}:#{opt.end}]"
+        else
+          a << opt.to_s
+        end
+      end
+      a.join(sep)
     end
 
     NEED_QUOTE = %w[
