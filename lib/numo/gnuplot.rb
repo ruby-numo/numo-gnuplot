@@ -41,7 +41,8 @@ class Gnuplot
       # output SVG to tmpfile
       gp = Gnuplot.default
       gp.reset
-      gp.set terminal:'svg', output:tempfile_svg.path
+      gp.set terminal:'svg'
+      gp.output:tempfile_svg.path
       gp.instance_eval(&@block)
       gp.unset 'output'
       svg = File.read(tempfile_svg.path)
@@ -202,16 +203,19 @@ class Gnuplot
 
   # output current plot to file with terminal setting from extension
   # (not Gnuplot command)
-  def output(filename,*opts)
-    if /\.(\w+)$/ =~ filename
-      ext = $1
-      ext = KNOWN_EXT[ext]||ext
-      set terminal:[ext,*opts], output:filename
-      refresh
-      unset :terminal, :output
-    else
+  def output(filename,term=nil,*opts)
+    if term.nil? && /\.(\w+)$/ =~ filename
+      term = $1
+    end
+    term = KNOWN_EXT[term] || term
+    if term.nil?
       kernel_raise GnuplotError,"file extension is not given"
     end
+    set terminal:[term,*opts]
+    set output:filename
+    refresh
+    unset :terminal
+    unset :output
   end
 
 
