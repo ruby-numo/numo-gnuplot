@@ -229,6 +229,7 @@ class Gnuplot
     @debug = false
   end
 
+  # send command-line string to Gnuplot directly
   def send(cmd)
     send_cmd(cmd)
   end
