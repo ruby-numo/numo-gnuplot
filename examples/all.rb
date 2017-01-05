@@ -4,7 +4,7 @@ require "numo/gnuplot"
 gp = Numo.gnuplot
 #gp.debug_on
 
-puts "enter key to continue"
+puts "Hit enter key to continue"
 
 files = Dir.glob("ex*.rb").sort
 files.each do |frb|
