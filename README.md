@@ -201,12 +201,11 @@ Numo::Gnuplot-specific methods:
 
 * debug_off  -- turn off debug print
 * debug_on  -- turn on debug print
-* output(filename,[term,*opts]) -- output current plot to file. This invokes the next commands;
+* output(filename,[term,*opts]) -- output current plot to file. If term is omitted, an extension in filename is regarded as a term name. This invokes the next commands;
 ```ruby
 set terminal:[term,*opts]
 set output:filename; refresh
 ```
-  If term is omitted, extension in filename is regarded as term name.
 * var(name) -- returns variable content in the Gnuplot context.
 
 See [API doc](http://www.rubydoc.info/gems/numo-gnuplot/Numo/Gnuplot) for more.
