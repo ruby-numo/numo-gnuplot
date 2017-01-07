@@ -102,6 +102,25 @@ class Gnuplot
     nil
   end
 
+  # The `fit` command can fit a user-supplied expression to a set of
+  # data points (x,z) or (x,y,z), using an implementation of the
+  # nonlinear least-squares (NLLS) Marquardt-Levenberg algorithm.
+  def fit(*args)
+    range, items = parse_fit_args(args)
+    r = range.map{|x| "#{x} "}.join
+    c = items.cmd_str
+    puts send_cmd("fit #{r}#{c}")
+    nil
+  end
+
+  # This command writes the current values of the fit parameters into
+  # the given file, formatted as an initial-value file (as described
+  # in the `fit`section).  This is useful for saving the current
+  # values for later use or for restarting a converged or stopped fit.
+  def update(*filenames)
+    puts send_cmd("update "+filenames.map{|f| "'#{f}'"}.join(" "))
+  end
+
   # The `set` command is used to set _lots_ of options.
   def set(*args)
     run "set #{OptArg.parse(*args)}"
@@ -120,8 +139,8 @@ class Gnuplot
   end
 
   # The `show` command shows their settings.
-  def show(x)
-    puts send_cmd "show #{x}"
+  def show(*args)
+    puts send_cmd "show #{OptArg.parse(*args)}"
   end
 
   #  The `reset` command causes all graph-related options that can be
@@ -144,7 +163,7 @@ class Gnuplot
 
   # The `load` command executes each line of the specified input file.
   def load(filename)
-    send_cmd "load '#{filename}'"
+    run "load '#{filename}'"
     nil
   end
 
@@ -231,7 +250,7 @@ class Gnuplot
 
   # send command-line string to Gnuplot directly
   def send(cmd)
-    send_cmd(cmd)
+    puts send_cmd(cmd)
   end
 
   #other_commands = %w[
@@ -240,7 +259,6 @@ class Gnuplot
   #  cd
   #  do
   #  evaluate
-  #  fit
   #  history
   #  if
   #  print
@@ -251,7 +269,6 @@ class Gnuplot
   #  stats
   #  system
   #  test
-  #  update
   #  while
   #]
 
@@ -274,7 +291,6 @@ class Gnuplot
     end
     nil
   end
-  private :run
 
   def send_cmd(s,data=nil)
     puts "<"+s if @debug
@@ -286,8 +302,8 @@ class Gnuplot
     @history << s
     @last_message = []
     while line=@ior.gets
-      puts ">"+line if @debug
       break if /^_end_of_cmd_$/ =~ line
+      puts ">"+line if @debug
       @last_message << line
     end
     @last_message
@@ -353,11 +369,54 @@ class Gnuplot
   end
   private :range_to_s
 
+  def parse_fit_args(args)
+    range = []
+    while !args.empty?
+      case a = args.first
+      when Range
+        range << range_to_s(args.shift)
+      when String
+        if /^\[.*\]$/ =~ a
+          range << args.shift
+        else
+          break
+        end
+      else
+        break
+      end
+    end
+    items = FitItem.new(args.shift, args.shift)
+    args.each do |arg|
+      case arg
+      when Range
+        range << range_to_s(arg)
+      when Array
+        if arg.all?{|e| e.kind_of?(Range)}
+          arg.each{|e| range << range_to_s(e)}
+        else
+          items << arg
+        end
+      else
+        items << arg
+      end
+    end
+    return [range,items]
+  end
+  private :parse_fit_args
+
 
   # @private
   module OptArg # :nodoc: all
 
     module_function
+
+    def from_symbol(s)
+      s = s.to_s
+      if /^(.*)_(noquote|nq)$/ =~ s
+        s = $1
+      end
+      s.tr('_',' ')
+    end
 
     def parse(*opts)
       sep = ","
@@ -368,18 +427,18 @@ class Gnuplot
         end
         case opt
         when Symbol
-          a << opt.to_s.tr('_',' ')
+          a << from_symbol(opt)
           case opt
           when :label
             if opts.first.kind_of?(Integer)
               a << opts.shift.to_s
             end
             if opts.first.kind_of?(String)
-              a << "'#{opts.shift}'"
+              a << opts.shift.inspect
             end
           when NEED_QUOTE
             if opts.first.kind_of?(String)
-              a << "'#{opts.shift}'"
+              a << opts.shift.inspect
             end
           end
         when Array
@@ -429,7 +488,7 @@ class Gnuplot
     end
 
     def parse_kv(s,v)
-      k = s.to_s.gsub(/_/,' ')
+      k = from_symbol(s)
       case s.to_sym
       when :at
         case v
@@ -596,6 +655,27 @@ class Gnuplot
 
   end # PlotItem
 
+
+  # @private
+  class FitItem # :nodoc: all
+    def initialize(expression,datafile)
+      @expression = expression
+      @datafile = datafile
+      @items = []
+    end
+
+    def <<(item)
+      @items << item
+    end
+
+    def empty?
+      @items.empty?
+    end
+
+    def cmd_str
+      "%s %s %s" % [@expression, "'#{@datafile}'", OptArg.parse(*@items)]
+    end
+  end
 
   # @private
   class SPlotItem < PlotItem  # :nodoc: all
