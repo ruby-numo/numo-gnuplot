@@ -179,6 +179,7 @@ Numo::Gnuplot class methods succeeded from Gnuplot commands:
 
 * clear
 * exit
+* fit(*args)
 * help(topic)
 * load(filename)
 * pause(*args)
@@ -191,6 +192,7 @@ Numo::Gnuplot class methods succeeded from Gnuplot commands:
 * show(option)
 * splot(*args)
 * unset(*options)
+* update(*files)
 
 Numo::Gnuplot class methods renamed from Gnuplot commands:
 
