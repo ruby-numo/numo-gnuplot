@@ -14,13 +14,13 @@ module Numo
   end
   module_function :noteplot
 
+  class GnuplotError < StandardError; end
+
 class Gnuplot
 
   VERSION = "0.1.7"
   POOL = []
   DATA_FORMAT = "%.7g"
-
-  class GnuplotError < StandardError; end
 
   def self.default
     POOL[0] ||= self.new
@@ -97,8 +97,8 @@ class Gnuplot
   private :_plot_splot
 
   # replot is not recommended, use refresh
-  def replot
-    run "replot\n#{@last_data}"
+  def replot(arg=nil)
+    run "replot #{arg}\n#{@last_data}"
     nil
   end
 
@@ -480,10 +480,14 @@ class Gnuplot
       ylabel
       zlabel
     ]
+    NONEED_QUOTE = %w[
+      log
+    ]
 
     def NEED_QUOTE.===(k)
       k = $1 if /_([^_]+)$/ =~ k
       re = /^#{k}/
+      return false if NONEED_QUOTE.any?{|q| re =~ q}
       any?{|q| re =~ q}
     end
 
