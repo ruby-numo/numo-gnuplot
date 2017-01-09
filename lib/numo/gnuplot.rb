@@ -118,7 +118,15 @@ class Gnuplot
   # in the `fit`section).  This is useful for saving the current
   # values for later use or for restarting a converged or stopped fit.
   def update(*filenames)
-    puts send_cmd("update "+filenames.map{|f| "'#{f}'"}.join(" "))
+    puts send_cmd("update "+filenames.map{|f| OptArg.quote(f)}.join(" "))
+  end
+
+  # This command prepares a statistical summary of the data in one or
+  # two columns of a file.
+  def stats(filename,*args)
+    fn = OptArg.quote(filename)
+    opt = OptArg.parse(*args)
+    puts send_cmd "stats #{fn} #{opt}"
   end
 
   # The `set` command is used to set _lots_ of options.
@@ -163,7 +171,7 @@ class Gnuplot
 
   # The `load` command executes each line of the specified input file.
   def load(filename)
-    run "load '#{filename}'"
+    run "load #{OptArg.quote(filename)}"
     nil
   end
 
@@ -266,7 +274,6 @@ class Gnuplot
   #  reread
   #  save
   #  shell
-  #  stats
   #  system
   #  test
   #  while
@@ -434,11 +441,11 @@ class Gnuplot
               a << opts.shift.to_s
             end
             if opts.first.kind_of?(String)
-              a << opts.shift.inspect
+              a << OptArg.quote(opts.shift)
             end
           when NEED_QUOTE
             if opts.first.kind_of?(String)
-              a << opts.shift.inspect
+              a << OptArg.quote(opts.shift)
             end
           end
         when Array
@@ -466,8 +473,10 @@ class Gnuplot
       locale
       logfile
       missing
+      name
       newhistogram
       output
+      prefix
       print
       rgb
       separator
@@ -491,6 +500,13 @@ class Gnuplot
       any?{|q| re =~ q}
     end
 
+    def quote(s)
+      if /^'(.*)'$/ =~ s || /^"(.*)"$/ =~ s
+        s = $1
+      end
+      s.inspect
+    end
+
     def parse_kv(s,v)
       k = from_symbol(s)
       case s.to_sym
@@ -499,19 +515,19 @@ class Gnuplot
         when String
           "#{k} #{v}" # not quote
         when Array
-          "#{k} #{v.map{|x|(x.kind_of? String) ? x.inspect : x.to_s}.join(",")}"
+          "#{k} #{v.map{|x| x.to_s}.join(",")}"
         else
           "#{k} #{parse(v)}"
         end
       when :label
         case v
         when String
-          "#{k} #{v.inspect}"
+          "#{k} #{OptArg.quote(v)}"
         when Array
           if v[0].kind_of?(Integer) && v[1].kind_of?(String)
-            "#{k} #{parse(v[0],v[1].inspect,*v[2..-1])}"
+            "#{k} #{parse(v[0],OptArg.quote(v[1]),*v[2..-1])}"
           elsif v[0].kind_of?(String)
-            "#{k} #{parse(v[0].inspect,*v[1..-1])}"
+            "#{k} #{parse(OptArg.quote(v[0]),*v[1..-1])}"
           else
             "#{k} #{parse(*v)}"
           end
@@ -521,7 +537,7 @@ class Gnuplot
       when NEED_QUOTE
         case v
         when String
-          "#{k} #{v.inspect}"
+          "#{k} #{OptArg.quote(v)}"
         when TrueClass
           k
         when NilClass
@@ -533,9 +549,9 @@ class Gnuplot
           when 0
             k
           when 1
-            "#{k} #{v[0].inspect}"
+            "#{k} #{OptArg.quote(v[0])}"
           else
-            "#{k} #{v[0].inspect} #{parse(*v[1..-1])}"
+            "#{k} #{OptArg.quote(v[0])} #{parse(*v[1..-1])}"
           end
         else
           "#{k} #{parse(v)}"
@@ -611,9 +627,7 @@ class Gnuplot
           if (o=@items.last).kind_of? Hash
             if o.any?{|k,v| /^#{k}/ =~ "using"}
               # @function is data file
-              if /^'.*'$/ !~ @function && /^".*"$/ !~ @function
-                @function = "'#{@function}'"
-              end
+              @function = OptArg.quote(@function)
             end
           end
         else
@@ -677,7 +691,7 @@ class Gnuplot
     end
 
     def cmd_str
-      "%s %s %s" % [@expression, "'#{@datafile}'", OptArg.parse(*@items)]
+      "%s %s %s" % [@expression, OptArg.quote(@datafile), OptArg.parse(*@items)]
     end
   end
 
