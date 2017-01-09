@@ -118,13 +118,13 @@ class Gnuplot
   # in the `fit`section).  This is useful for saving the current
   # values for later use or for restarting a converged or stopped fit.
   def update(*filenames)
-    puts send_cmd("update "+filenames.map{|f| OptArg.quote(f)}.join(" "))
+    puts send_cmd("update "+filenames.map{|f| OptArg.squote(f)}.join(" "))
   end
 
   # This command prepares a statistical summary of the data in one or
   # two columns of a file.
   def stats(filename,*args)
-    fn = OptArg.quote(filename)
+    fn = OptArg.squote(filename)
     opt = OptArg.parse(*args)
     puts send_cmd "stats #{fn} #{opt}"
   end
@@ -171,7 +171,7 @@ class Gnuplot
 
   # The `load` command executes each line of the specified input file.
   def load(filename)
-    run "load #{OptArg.quote(filename)}"
+    run "load #{OptArg.squote(filename)}"
     nil
   end
 
@@ -507,6 +507,14 @@ class Gnuplot
       s.inspect
     end
 
+    def squote(s)
+      if /^'.*'$/ =~ s || /^".*"$/ =~ s
+        s
+      else
+        "'#{s}'"
+      end
+    end
+
     def parse_kv(s,v)
       k = from_symbol(s)
       case s.to_sym
@@ -627,7 +635,7 @@ class Gnuplot
           if (o=@items.last).kind_of? Hash
             if o.any?{|k,v| /^#{k}/ =~ "using"}
               # @function is data file
-              @function = OptArg.quote(@function)
+              @function = OptArg.squote(@function)
             end
           end
         else
@@ -691,7 +699,7 @@ class Gnuplot
     end
 
     def cmd_str
-      "%s %s %s" % [@expression, OptArg.quote(@datafile), OptArg.parse(*@items)]
+      "%s %s %s" % [@expression, OptArg.squote(@datafile), OptArg.parse(*@items)]
     end
   end
 
