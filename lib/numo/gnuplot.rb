@@ -289,10 +289,15 @@ class Gnuplot
   def run(s,data=nil)
     res = send_cmd(s,data)
     if !res.empty?
-      if res.size > 7
-        msg = "\n"+res[0..5].join("")+" :\n"
+      if res.size < 7
+        if res.all?{|x| /^\s*(line \d+: )?warning:/i =~ x}
+          $stderr.puts res.join.strip
+          return nil
+        else
+          msg = "\n"+res.join.strip
+        end
       else
-        msg = "\n"+res.join("")
+        msg = "\n"+res[0..5].join.strip+"\n :\n"
       end
       kernel_raise GnuplotError,msg
     end
@@ -468,6 +473,7 @@ class Gnuplot
       commentschars
       dashtype
       decimalsign
+      file
       fontpath
       format
       locale
@@ -488,9 +494,12 @@ class Gnuplot
       y2label
       ylabel
       zlabel
+      xy
     ]
     NONEED_QUOTE = %w[
+      for
       log
+      smooth
     ]
 
     def NEED_QUOTE.===(k)
@@ -501,17 +510,27 @@ class Gnuplot
     end
 
     def quote(s)
-      if /^'(.*)'$/ =~ s || /^"(.*)"$/ =~ s
-        s = $1
+      case s
+      when String
+        if /^'(.*)'$/ =~ s || /^"(.*)"$/ =~ s
+          s = $1
+        end
+        s.inspect
+      else
+        s
       end
-      s.inspect
     end
 
     def squote(s)
-      if /^'.*'$/ =~ s || /^".*"$/ =~ s
-        s
+      case s
+      when String
+        if /^'.*'$/ =~ s || /^".*"$/ =~ s
+          s
+        else
+          "'#{s}'"
+        end
       else
-        "'#{s}'"
+        s
       end
     end
 
@@ -539,6 +558,8 @@ class Gnuplot
           else
             "#{k} #{parse(*v)}"
           end
+        when TrueClass
+          k
         else
           "#{k} #{parse(v)}"
         end
@@ -553,13 +574,15 @@ class Gnuplot
         when FalseClass
           nil
         when Array
-          case v.size
-          when 0
-            k
-          when 1
-            "#{k} #{OptArg.quote(v[0])}"
+          case v[0]
+          when String
+            if v.size == 1
+              "#{k} #{OptArg.quote(v[0])}"
+            else
+              "#{k} #{OptArg.quote(v[0])} #{parse(*v[1..-1])}"
+            end
           else
-            "#{k} #{OptArg.quote(v[0])} #{parse(*v[1..-1])}"
+            "#{k} #{parse(*v)}"
           end
         else
           "#{k} #{parse(v)}"
@@ -575,7 +598,8 @@ class Gnuplot
         when FalseClass
           nil
         when Array
-          if /^#{k}/ =~ "using"
+          re = /^#{k}/
+          if re =~ "using" || re =~ "every"
             "#{k} #{v.join(':')}"
           elsif v.empty?
             k
