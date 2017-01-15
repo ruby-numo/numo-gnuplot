@@ -5,7 +5,7 @@
 * [RubyGems site](https://rubygems.org/gems/numo-gnuplot)
 * [API doc](http://www.rubydoc.info/gems/numo-gnuplot/Numo/Gnuplot)
 
-* Visit [Demo page](https://github.com/ruby-numo/numo-gnuplot-demo).
+* Visit [Numo::Gnuplot Demo repository](https://github.com/ruby-numo/numo-gnuplot-demo)!
 
 Although there are many [other Gnuplot interface libraries for Ruby](https://github.com/ruby-numo/gnuplot#related-work),
 none of them have so simple interface as to show an XY data plot by just typing:
@@ -32,7 +32,7 @@ Or install it yourself as:
 
     $ gem install numo-gnuplot
 
-## Demo page
+## Demo
 
 * [Ruby/Numo::Gnuplot Demo](https://github.com/ruby-numo/numo-gnuplot-demo)
 
