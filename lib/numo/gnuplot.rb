@@ -230,7 +230,8 @@ class Gnuplot
 
   # output current plot to file with terminal setting from extension
   # (not Gnuplot command)
-  def output(filename,term=nil,*opts)
+  def output(filename,**opts)
+    term = opts.delete(:term) || opts.delete(:terminal)
     if term.nil? && /\.(\w+)$/ =~ filename
       term = $1
     end
@@ -238,7 +239,7 @@ class Gnuplot
     if term.nil?
       kernel_raise GnuplotError,"file extension is not given"
     end
-    set terminal:[term,*opts]
+    set :terminal, term, *opts
     set output:filename
     refresh
     unset :terminal
