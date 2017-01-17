@@ -308,9 +308,27 @@ class Gnuplot
   def send_cmd(s,data=nil)
     if @debug
       puts "<"+s
-      if data && /^(.+)$(.*)/ =~ data
-        puts "<"+$1
-        puts "<..." if $2
+      if data
+        if data[0..256].force_encoding("UTF-8").ascii_only?
+          if /\A(.+?)?$(.+)?^(.+?)?\z/m =~ data
+            l1,l2,l3 = $1,$2,$3
+            if l1
+              l1 = l1[0..70] if l1.size > 72
+              puts "<"+l1
+            end
+            if l2
+              puts "<..."
+            end
+            if l3
+              l3 = l3[0..70] if l3.size > 72
+              puts "<"+l3
+            end
+          end
+        else
+          c = data[0..31].inspect
+          c += "..." if data.size > 32
+          puts "<"+c
+        end
       end
     end
     @iow.puts s
