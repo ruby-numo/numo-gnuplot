@@ -1,3 +1,7 @@
 require "rake/clean"
 
 CLEAN.include %w[*.png tmp.dat]
+
+task :default do
+  sh "ruby all.rb"
+end
