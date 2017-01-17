@@ -306,7 +306,13 @@ class Gnuplot
   end
 
   def send_cmd(s,data=nil)
-    puts "<"+s if @debug
+    if @debug
+      puts "<"+s
+      if data && /^(.+)$(.*)/ =~ data
+        puts "<"+$1
+        puts "<..." if $2
+      end
+    end
     @iow.puts s
     @iow.puts data
     @iow.flush
