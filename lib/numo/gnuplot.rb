@@ -677,6 +677,13 @@ class Gnuplot
               data << x
             else
               @options << x
+              if x.kind_of? Hash
+                x.each do |k,v|
+                  if /^#{k}/ =~ "with"
+                    @style = v; break;
+                  end
+                end
+              end
             end
           end
           if data.empty?
@@ -688,8 +695,21 @@ class Gnuplot
       end
     end
 
+    def parse_data_style(data)
+      if @style
+        re = /^#{@style}/
+        if re =~ "image"
+          return ImageData.new(*data)
+        elsif re =~ "rgbimage"
+          raise "rgbimage: to be supported"
+        elsif re =~ "rgbalpha"
+          raise "rgbalpha: to be supported"
+        end
+      end
+    end
+
     def parse_data(data)
-      PlotData.new(*data)
+      parse_data_style(data) || PlotData.new(*data)
     end
 
     def cmd_str
@@ -737,15 +757,10 @@ class Gnuplot
   # @private
   class SPlotItem < PlotItem  # :nodoc: all
     def parse_data(data)
-      if data.size == 1
-        if data[0].respond_to?(:shape)
-          SPlotArray.new(*data)
-        else
-          PlotData.new(*data)
-        end
-      else
+      parse_data_style(data) ||
+        (data.size == 1) ?
+        ImageData.new(data.first) :
         SPlotRecord.new(*data)
-      end
     end
   end
 
@@ -873,17 +888,36 @@ class Gnuplot
   end
 
   # @private
-  class SPlotArray < PlotData  # :nodoc: all
+  class ImageData < PlotData  # :nodoc: all
+
     def initialize(data)
+      @text = false
       @data = data
+      if @data.respond_to?(:shape)
+        if @data.shape.size != 2
+          raise IndexError,"array should be 2-dimensional"
+        end
+        @shape = @data.shape
+      elsif @data.kind_of? Array
+        n = nil
+        @data.each do |a|
+          a = a.to_a
+          if n && n != a.size
+            raise IndexError,"element size differs (%d should be %d)"%[a.size, n]
+          end
+          n = a.size
+        end
+        @shape = [n,@data.size]
+      else
+        raise ArgumentError,"argument should be data array"
+      end
     end
 
     def cmd_str
       if @text
         "'-' matrix"
       else
-        s = @data.shape
-        "'-' binary array=(#{s[1]},#{s[0]}) format='%float64'"
+        "'-' binary array=(#{@shape[0]},#{@shape[1]}) format='%float64'"
       end
     end
 
@@ -891,7 +925,7 @@ class Gnuplot
       if @text
         f = data_format
         s = ""
-        a.each do |b|
+        @data.to_a.each do |b|
           s << b.map{|e| f%e}.join(" ")+"\n"
         end
         s+"\ne"
