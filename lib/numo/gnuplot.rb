@@ -910,22 +910,24 @@ class Gnuplot
 
     def initialize(data)
       @text = false
-      @data = data
-      if @data.respond_to?(:shape)
-        if @data.shape.size != 2
+      if data.respond_to?(:shape)
+        if data.shape.size != 2
           raise IndexError,"array should be 2-dimensional"
         end
+        @data = data
         @shape = @data.shape
-      elsif @data.kind_of? Array
+      elsif data.kind_of? Array
         n = nil
-        @data.each do |a|
+        @data = data.map do |a|
           a = a.to_a
-          if n && n != a.size
-            raise IndexError,"element size differs (%d should be %d)"%[a.size, n]
+          m = a.size
+          if n && n != m
+            raise IndexError,"element size differs (%d should be %d)"%[m, n]
           end
-          n = a.size
+          n = m
+          a
         end
-        @shape = [n,@data.size]
+        @shape = [@data.size,n]
       else
         raise ArgumentError,"argument should be data array"
       end
@@ -935,7 +937,7 @@ class Gnuplot
       if @text
         "'-' matrix"
       else
-        "'-' binary array=(#{@shape[0]},#{@shape[1]}) format='%float64'"
+        "'-' binary array=(#{@shape[1]},#{@shape[0]}) format='%float64'"
       end
     end
 
