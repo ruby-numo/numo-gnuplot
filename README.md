@@ -1,11 +1,14 @@
 # Numo::Gnuplot : Gnuplot interface for Ruby
 
 * Alpha version under development.
+
 * [GitHub site](https://github.com/ruby-numo/gnuplot)
 * [RubyGems site](https://rubygems.org/gems/numo-gnuplot)
-* [API doc](http://www.rubydoc.info/gems/numo-gnuplot/Numo/Gnuplot)
 
-* Visit [Numo::Gnuplot Demo repository](https://github.com/ruby-numo/numo-gnuplot-demo)!
+* [Demo repository](https://github.com/ruby-numo/numo-gnuplot-demo)
+
+* [API doc](http://www.rubydoc.info/gems/numo-gnuplot/Numo/Gnuplot)
+* [Introduction.ja](https://github.com/ruby-numo/gnuplot/wiki/Introduction.ja) (in Japanese)
 
 Although there are many [other Gnuplot interface libraries for Ruby](https://github.com/ruby-numo/gnuplot#related-work),
 none of them have so simple interface as to show an XY data plot by just typing:
