@@ -4,7 +4,6 @@
 
 * [GitHub site](https://github.com/ruby-numo/gnuplot)
 * [RubyGems site](https://rubygems.org/gems/numo-gnuplot)
-
 * [Demo repository](https://github.com/ruby-numo/numo-gnuplot-demo)
 
 * [API doc](http://www.rubydoc.info/gems/numo-gnuplot/Numo/Gnuplot)
