@@ -89,7 +89,7 @@ class Gnuplot
 
   def _plot_splot(cmd,contents)
     r = contents.shift.map{|x| "#{x} "}.join
-    c = contents.map{|x| x.cmd_str}.join(",")
+    c = contents.map{|x| x.cmd_str}.join(", ")
     d = contents.map{|x| x.data_str}.join
     run "#{cmd} #{r}#{c}", d
     nil
@@ -308,26 +308,48 @@ class Gnuplot
   def send_cmd(s,data=nil)
     if @debug
       puts "<"+s
-      if data
-        if data[0..256].force_encoding("UTF-8").ascii_only?
-          if /\A(.+?)?$(.+)?^(.+?)?\z/m =~ data
-            l1,l2,l3 = $1,$2,$3
-            if l1
-              l1 = l1[0..70] if l1.size > 72
-              puts "<"+l1
+      if data && !data.empty?
+        if data.size > 144
+          s1 = data[0..71]
+          s2 = data[-72..-1]
+          if s1.force_encoding("UTF-8").ascii_only? &&
+              s2.force_encoding("UTF-8").ascii_only?
+            a = [nil]*6
+            if /\A(.+?)$(.+)?/m =~ s1
+              a[0..1] = $1,$2
+              if a[1] && /\A(.+?)?$(.+)?/m =~ a[1].strip
+                a[1..2] = $1,$2
+                a[1] = a[1]+"..." if !a[2]
+              else
+                a[0] = a[0]+"..."
+              end
             end
-            if l2
-              puts "<..."
+            if /(.+)?^(.+?)\z/m =~ s2
+              a[4..5] = $1,$2
+              if a[4] && /(.+)?^(.+?)?\z/m =~ a[4].strip
+                a[3..4] = $1,$2
+                a[4] = "..."+a[4] if !a[3]
+              else
+                a[5] = "..."+a[5]
+              end
             end
-            if l3
-              l3 = l3[0..70] if l3.size > 72
-              puts "<"+l3
+            if a[2] || a[3]
+              a[2..3] = ["...",nil]
             end
+            a.each{|l| puts "<"+l if l}
+          else
+            c = data[0..31].inspect
+            c += "..." if data.size > 32
+            puts "<"+c
           end
         else
-          c = data[0..31].inspect
-          c += "..." if data.size > 32
-          puts "<"+c
+          if data.force_encoding("UTF-8").ascii_only?
+            data.split(/\n/).each{|l| puts "<"+l}
+          else
+            c = data[0..31].inspect
+            c += "..." if data.size > 32
+            puts "<"+c
+          end
         end
       end
     end
@@ -719,9 +741,9 @@ class Gnuplot
         if re =~ "image"
           return ImageData.new(*data)
         elsif re =~ "rgbimage"
-          raise "rgbimage: to be supported"
+          return RgbImageData.new(*data)
         elsif re =~ "rgbalpha"
-          raise "rgbalpha: to be supported"
+          return RgbAlphaData.new(*data)
         end
       end
     end
@@ -785,6 +807,7 @@ class Gnuplot
 
   # @private
   class PlotData  # :nodoc: all
+
     def data_format
       @data_format || DATA_FORMAT
     end
@@ -908,26 +931,48 @@ class Gnuplot
   # @private
   class ImageData < PlotData  # :nodoc: all
 
+    def check_shape
+      if @data.shape.size != 2
+        raise IndexError,"array should be 2-dimensional"
+      end
+      @shape = @data.shape
+    end
+
     def initialize(data)
       @text = false
       if data.respond_to?(:shape)
-        if data.shape.size != 2
-          raise IndexError,"array should be 2-dimensional"
-        end
         @data = data
-        @shape = @data.shape
+        check_shape
+        if defined? Numo::NArray
+          @format =
+            case @data
+            when Numo::DFloat; "%float64"
+            when Numo::SFloat; "%float32"
+            when Numo::Int8;   "%int8"
+            when Numo::UInt8;  "%uint8"
+            when Numo::Int16;  "%int16"
+            when Numo::UInt16; "%uint16"
+            when Numo::Int32;  "%int32"
+            when Numo::UInt32; "%uint32"
+            when Numo::Int64;  "%int64"
+            when Numo::UInt64; "%uint64"
+            else
+              raise ArgumentError,"not supported NArray type"
+            end
+        end
       elsif data.kind_of? Array
         n = nil
-        @data = data.map do |a|
-          a = a.to_a
+        @data = []
+        data.each do |a|
+          @data.concat(a)
           m = a.size
           if n && n != m
             raise IndexError,"element size differs (%d should be %d)"%[m, n]
           end
           n = m
-          a
         end
-        @shape = [@data.size,n]
+        @shape = [data.size,n]
+        @format = "%float64"
       else
         raise ArgumentError,"argument should be data array"
       end
@@ -937,7 +982,7 @@ class Gnuplot
       if @text
         "'-' matrix"
       else
-        "'-' binary array=(#{@shape[1]},#{@shape[0]}) format='%float64'"
+        "'-' binary array=(#{@shape[1]},#{@shape[0]}) format='#{@format}'"
       end
     end
 
@@ -950,10 +995,58 @@ class Gnuplot
         end
         s+"\ne"
       elsif defined? Numo::NArray
-        Numo::DFloat.cast(@data).to_string
+        if @data.kind_of?(Numo::NArray)
+          @data.to_string
+        else
+          Numo::DFloat.cast(@data).to_string
+        end
       else
-        @data.to_a.flatten.pack("d*")
+        @data.pack("d*")
       end
+    end
+  end
+
+  # @private
+  class RgbImageData < ImageData  # :nodoc: all
+
+    def initialize(data)
+      if data.kind_of?(Numo::NArray)
+        super(data)
+      else
+        super(Numo::NArray[*data])
+      end
+    end
+
+    def check_shape
+      if @data.shape.size != 3
+        raise IndexError,"array should be 2-dimensional"
+      end
+      if @data.shape[2] != 3
+        raise IndexError,"shape[2] (last dimension size) must be 3"
+      end
+      @shape = @data.shape
+    end
+  end
+
+  # @private
+  class RgbAlphaData < ImageData  # :nodoc: all
+
+    def initialize(data)
+      if data.kind_of?(Numo::NArray)
+        super(data)
+      else
+        super(Numo::NArray[*data])
+      end
+    end
+
+    def check_shape
+      if @data.shape.size != 3
+        raise IndexError,"array should be 2-dimensional"
+      end
+      if @data.shape[2] != 4
+        raise IndexError,"shape[2] (last dimension size) must be 4"
+      end
+      @shape = @data.shape
     end
   end
 
