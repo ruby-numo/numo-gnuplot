@@ -1,6 +1,6 @@
 # Numo::Gnuplot : Gnuplot interface for Ruby
 
-* Alpha version under development.
+Alpha version under development.
 
 * [GitHub site](https://github.com/ruby-numo/gnuplot)
 * [RubyGems site](https://rubygems.org/gems/numo-gnuplot)
