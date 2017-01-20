@@ -18,7 +18,7 @@ module Numo
 
 class Gnuplot
 
-  VERSION = "0.2.0"
+  VERSION = "0.2.1"
   POOL = []
   DATA_FORMAT = "%.7g"
 
