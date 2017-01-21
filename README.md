@@ -4,9 +4,9 @@ Alpha version under development.
 
 * [GitHub site](https://github.com/ruby-numo/gnuplot)
 * [RubyGems site](https://rubygems.org/gems/numo-gnuplot)
-* [Demo repository](https://github.com/ruby-numo/numo-gnuplot-demo)
+* [Demo repository](https://github.com/ruby-numo/numo-gnuplot-demo) including > 500 plots!
 
-* [API doc](http://www.rubydoc.info/gems/numo-gnuplot/Numo/Gnuplot)
+* [API doc](http://www.rubydoc.info/gems/numo-gnuplot/0.2.1/Numo/Gnuplot)
 * [Introduction.ja](https://github.com/ruby-numo/gnuplot/wiki/Introduction.ja) (in Japanese)
 
 Although there are many [other Gnuplot interface libraries for Ruby](https://github.com/ruby-numo/gnuplot#related-work),
