@@ -1,5 +1,10 @@
 * allow rgbimage, rgbalpha -- done
 * allow timefmt data
 
+* xtics array:
+    set xtics ("-π" -pi, "-π/2" -pi/2, 0, "π/2" pi/2, "π" pi)
+* binary options:
+    origin=(10,10)
+
 * more examples
 * all style catalog

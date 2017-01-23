@@ -4,7 +4,7 @@ Alpha version under development.
 
 * [GitHub site](https://github.com/ruby-numo/gnuplot)
 * [RubyGems site](https://rubygems.org/gems/numo-gnuplot)
-* [Demo repository](https://github.com/ruby-numo/numo-gnuplot-demo) including > 500 plots!
+* [Demo repository](https://github.com/ruby-numo/numo-gnuplot-demo) contains > 500 plots!
 
 * [API doc](http://www.rubydoc.info/gems/numo-gnuplot/0.2.1/Numo/Gnuplot)
 * [Introduction.ja](https://github.com/ruby-numo/gnuplot/wiki/Introduction.ja) (in Japanese)
@@ -218,10 +218,14 @@ See [API doc](http://www.rubydoc.info/gems/numo-gnuplot/Numo/Gnuplot) for more.
 
 ## Related Work
 
-* [Ruby Gnuplot](https://github.com/rdp/ruby_gnuplot/tree/master)
+* [Ruby Gnuplot](https://github.com/rdp/ruby_gnuplot)
+* [ruby-plot](https://github.com/davor/ruby-plot)
+* [Plotrobber](https://github.com/elitheeli/plotrobber)
 * [GNUPlotr](https://github.com/pbosetti/gnuplotr)
 * [GnuPlotter](https://github.com/maasha/gnuplotter)
+* [scbi_plot](https://rubygems.org/gems/scbi_plot)
 * [GnuplotRB](https://github.com/dilcom/gnuplotrb)
+* [NumPlot](https://rubygems.org/gems/numplot)
 
 ## Contributing
 
