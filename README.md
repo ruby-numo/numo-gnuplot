@@ -88,7 +88,7 @@ irb(gnuplot):002:0> set t:"Example Plot"
 irb(gnuplot):003:0> plot "sin(x)",w:"lines"
 ```
 
-* Plotting X-Y data.
+* Plotting X-Y data stored in arrays.
 
 ```ruby
 require "numo/gnuplot"
@@ -102,7 +102,7 @@ Numo.gnuplot do
 end
 ```
 
-* Plotting X-Y data in NArray.
+* Plotting X-Y data stored in NArrays.
 
 ```ruby
 require "numo/gnuplot"
@@ -129,12 +129,14 @@ x = Numo::DFloat[-n..n]/n*10
 
 Numo.gnuplot do
   set title:"multiple data series"
-  # place next data after option Hash
+
+  # Hash-separated form
   plot x,NM.sin(x), {w:'points',t:'sin(x)'}, x,x*NM.sin(x),{w:"lines",t:'x*sin(x)'}
-  # or place data and options in Array
-  # plot [x,NM.sin(x), w:'points',t:'sin(x)'], [x,x*NM.sin(x),w:"lines",t:'x*sin(x)']
-  # (here last item in each Array should be Hash in order to distinguish from array data)
-  gets
+
+  # or Array-separated form
+  plot [x,NM.sin(x), w:'points',t:'sin(x)'], [x,x*NM.sin(x),w:"lines",t:'x*sin(x)']
+  # (here last item in each Array should be Hash, to distinguish from data array)
+
 end
 ```
 
