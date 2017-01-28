@@ -42,8 +42,8 @@ class Gnuplot
       gp = Gnuplot.default
       gp.reset
       gp.set terminal:'svg'
+      gp.set output:tempfile_svg.path
       gp.instance_eval(&@block)
-      gp.output tempfile_svg.path
       gp.unset 'output'
       svg = File.read(tempfile_svg.path)
       tempfile_svg.close
