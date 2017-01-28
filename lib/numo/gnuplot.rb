@@ -37,13 +37,13 @@ class Gnuplot
 
     def to_iruby
       require 'tempfile'
-      tempfile_svg = Tempfile.open('plot')
+      tempfile_svg = Tempfile.open(['plot','.svg'])
       # output SVG to tmpfile
       gp = Gnuplot.default
       gp.reset
       gp.set terminal:'svg'
-      gp.output:tempfile_svg.path
       gp.instance_eval(&@block)
+      gp.output tempfile_svg.path
       gp.unset 'output'
       svg = File.read(tempfile_svg.path)
       tempfile_svg.close
