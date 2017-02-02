@@ -290,6 +290,9 @@ class Gnuplot
   def run(s,data=nil)
     res = send_cmd(s,data)
     if !res.empty?
+      if /.*?End\sof\sanimation\ssequence.*?/im =~ res.to_s
+        return nil
+      end
       if res.size < 7
         if res.all?{|x| /^\s*(line \d+: )?warning:/i =~ x}
           $stderr.puts res.join.strip
