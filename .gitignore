@@ -52,3 +52,5 @@ rdoc/
 
 # examples
 /examples/*.png
+t
+t.rb
