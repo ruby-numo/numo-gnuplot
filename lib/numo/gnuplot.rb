@@ -364,7 +364,7 @@ class Gnuplot
     @history << s
     @last_message = []
     while line=@ior.gets
-      break if /^_end_of_cmd_$/ =~ line
+      break if /^_end_of_cmd_$/ =~ line.chomp
       puts ">"+line if @debug
       @last_message << line
     end
