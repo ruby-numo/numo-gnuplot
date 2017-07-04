@@ -836,7 +836,7 @@ class Gnuplot
       if @text
         s = ""
         @n.times{|i| s << line_str(i)+"\n"}
-        s + "e"
+        s + "e\n"
       elsif defined? Numo::NArray
         m = @data.size
         x = Numo::DFloat.zeros(@n,m)
