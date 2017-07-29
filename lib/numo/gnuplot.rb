@@ -498,6 +498,10 @@ class Gnuplot
             if opts.first.kind_of?(String)
               a << OptArg.quote(opts.shift)
             end
+          when NEED_QUOTE_TIME
+            if opts.first.kind_of?(String)
+              a << OptArg.quote_time(opts.shift)
+            end
           when NEED_QUOTE
             if opts.first.kind_of?(String)
               a << OptArg.quote(opts.shift)
@@ -514,6 +518,12 @@ class Gnuplot
         end
       end
       a.join(sep)
+    end
+
+    NEED_QUOTE_TIME = /^timef(mt?)?/
+
+    def quote_time(s)
+      "\"\\\"#{s}\\\"\""
     end
 
     NEED_QUOTE = %w[
@@ -613,6 +623,8 @@ class Gnuplot
         else
           "#{k} #{parse(v)}"
         end
+      when NEED_QUOTE_TIME
+        "#{k} #{OptArg.quote_time(v)}"
       when NEED_QUOTE
         case v
         when String
