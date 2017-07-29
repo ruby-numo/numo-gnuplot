@@ -689,13 +689,24 @@ class Gnuplot
           t = Numeric if t < Numeric
           return a.all?{|e| e.kind_of?(t)}
         end
-      elsif defined?(Numo::NArray)
+      end
+      if defined?(Numo::NArray)
         return true if a.kind_of?(Numo::NArray)
-      elsif defined?(::NArray)
+      end
+      if defined?(::NArray)
         return true if a.kind_of?(::NArray)
-      elsif defined?(::NMatrix)
+      end
+      if defined?(::NMatrix)
         return true if a.kind_of?(::NMatrix)
       end
+      case a[a.size-1] # quick check for unknown data class
+      when Numeric
+        return true if a[0].kind_of?(Numeric)
+      when String
+        return true if a[0].kind_of?(String)
+      end
+      false
+    rescue
       false
     end
 
@@ -831,7 +842,7 @@ class Gnuplot
       if data.empty?
         raise ArgumentError,"no data"
       end
-      @data = data.map{|a| a.flatten}
+      @data = data.map{|a| a.respond_to?(:flatten) ? a.flatten : a}
       @n = @data.map{|a| a.size}.min
       @text = true
     end
