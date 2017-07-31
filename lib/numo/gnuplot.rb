@@ -426,7 +426,7 @@ class Gnuplot
     when 2
       "[#{a[0]}:#{a[1]}]"
     else
-      raise ArgumetError,"wrong number of argument"
+      kernel_raise ArgumentError,"wrong number of argument"
     end
   end
   private :range_to_s
@@ -883,7 +883,7 @@ class Gnuplot
         else
           s = v.to_s
           if /"/ =~ s
-            kernel_raise GnuplotError,"should not include double quotation in data"
+            raise GnuplotError,"should not include double quotation in data"
           else
             s = '"'+s+'"'
           end
@@ -915,12 +915,12 @@ class Gnuplot
         elsif is_2d
           [a.size, size_min]
         else
-          kernel_raise GnuplotError, "not suitable Array for data"
+          raise GnuplotError, "not suitable Array for data"
         end
       elsif a.respond_to?(:shape)
         a.shape
       else
-        kernel_raise GnuplotError, "not suitable type for data"
+        raise GnuplotError, "not suitable type for data"
       end
     end
   end
@@ -936,7 +936,7 @@ class Gnuplot
       if shape.size >= 2
         n = shape[1]*shape[0]
         if @n < n
-          kernel_raise GnuplotError, "data size mismatch"
+          raise GnuplotError, "data size mismatch"
         end
         @n = n
         @record = "#{shape[1]},#{shape[0]}"
