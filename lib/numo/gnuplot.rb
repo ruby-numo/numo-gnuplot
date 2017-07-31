@@ -919,6 +919,8 @@ class Gnuplot
         end
       elsif a.respond_to?(:shape)
         a.shape
+      elsif PlotItem.is_data(a)
+        [a.size]
       else
         raise GnuplotError, "not suitable type for data"
       end
@@ -930,9 +932,9 @@ class Gnuplot
 
     def initialize(x,y,z)
       @text = false
-      @data = [x,y,z].map{|a| a.flatten}
+      @data = [x,y,z].map{|a| a.respond_to?(:flatten) ? a.flatten : a}
       @n = @data.map{|a| a.size}.min
-      shape = PlotData.array_shape(z)
+      shape = PlotData.array_shape(@data[2])
       if shape.size >= 2
         n = shape[1]*shape[0]
         if @n < n
