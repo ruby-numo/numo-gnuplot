@@ -855,6 +855,15 @@ class Gnuplot
       end
     end
 
+    def as_array(a)
+      case a
+      when Numo::NArray,Array
+        a
+      else
+        a.to_a
+      end
+    end
+
     def data_str
       if @text
         s = ""
@@ -863,7 +872,7 @@ class Gnuplot
       elsif defined? Numo::NArray
         m = @data.size
         x = Numo::DFloat.zeros(@n,m)
-        m.times{|i| x[true,i] = @data[i][0...@n]}
+        m.times{|i| x[true,i] = as_array(@data[i])[0...@n]}
         x.to_string
       else
         s = []
