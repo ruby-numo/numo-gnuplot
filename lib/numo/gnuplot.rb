@@ -1031,14 +1031,14 @@ class Gnuplot
           s << b.map{|e| f%e}.join(" ")+"\n"
         end
         s+"\ne"
-      elsif defined? Numo::NArray
-        if @data.kind_of?(Numo::NArray)
-          @data.to_string
-        else
-          Numo::DFloat.cast(@data).to_string
-        end
-      else
+      elsif defined? Numo::NArray && @data.kind_of?(Numo::NArray)
+        @data.to_string
+      elsif @data.kind_of?(Array)
         @data.pack("d*")
+      elsif @data.repond_to?(:to_a)
+        @data.to_a.pack("d*")
+      else
+        raise TypeError,"invalid data type: #{@data.class}"
       end
     end
   end
