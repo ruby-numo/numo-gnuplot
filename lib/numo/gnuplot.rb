@@ -726,7 +726,7 @@ class Gnuplot
       if !@options
         if @items.empty?
           return
-        elsif @items.first.kind_of? String
+        elsif @items.first.kind_of?(String) || @items.first.kind_of?(Symbol)
           @function = @items.first
           @options = @items[1..-1]
           if (o=@items.last).kind_of? Hash
