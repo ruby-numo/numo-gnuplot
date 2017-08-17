@@ -571,10 +571,9 @@ class Gnuplot
 
     def quote(s)
       case s
+      when /^('.*'|".*")$/
+        s
       when String
-        if /^'(.*)'$/ =~ s || /^"(.*)"$/ =~ s
-          s = $1
-        end
         s.inspect
       else
         s
