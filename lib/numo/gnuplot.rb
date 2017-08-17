@@ -361,6 +361,7 @@ class Gnuplot
     @iow.flush
     @iow.puts "print '_end_of_cmd_'"
     @iow.flush
+    @last_data = data
     @history << s
     @last_message = []
     while line=@ior.gets
