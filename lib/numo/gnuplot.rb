@@ -92,13 +92,14 @@ class Gnuplot
     c = contents.map{|x| x.cmd_str}.join(", ")
     d = contents.map{|x| x.data_str}.join
     run "#{cmd} #{r}#{c}", d
+    @last_data = d
     nil
   end
   private :_plot_splot
 
   # replot is not recommended, use refresh
   def replot(arg=nil)
-    run "replot #{arg}\n#{@last_data}"
+    run "replot #{arg}", @last_data
     nil
   end
 
@@ -361,7 +362,6 @@ class Gnuplot
     @iow.flush
     @iow.puts "print '_end_of_cmd_'"
     @iow.flush
-    @last_data = data
     @history << s
     @last_message = []
     while line=@ior.gets
