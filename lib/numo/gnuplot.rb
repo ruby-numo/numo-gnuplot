@@ -294,7 +294,7 @@ class Gnuplot
         return nil
       end
       if res.size < 7
-        if res.all?{|x| /^\s*(line \d+: )?warning:/i =~ x}
+        if /^\s*(line \d+: )?warning:/i =~ res[0]
           $stderr.puts res.join.strip
           return nil
         else
