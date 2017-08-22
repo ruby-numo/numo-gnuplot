@@ -1,31 +1,24 @@
 # Numo::Gnuplot : Gnuplot interface for Ruby
 
 <div class="row">
-
 <a href=https://github.com/ruby-numo/gnuplot-demo/blob/master/gnuplot/md/006histograms/README.md>
 <img src="https://raw.githubusercontent.com/ruby-numo/gnuplot-demo/master/gnuplot/md/006histograms/image/006.png" height="135" width="135">
 </a>
-
 <a href=https://github.com/ruby-numo/gnuplot-demo/blob/master/gnuplot/md/501rainbow/README.md>
 <img src="https://raw.githubusercontent.com/ruby-numo/gnuplot-demo/master/gnuplot/md/501rainbow/image/002.png" height="135" width="135">
 </a>
-
 <a href=https://github.com/ruby-numo/gnuplot-demo/blob/master/gnuplot/md/603finance/README.md>
 <img src="https://raw.githubusercontent.com/ruby-numo/gnuplot-demo/master/gnuplot/md/603finance/image/013.png" height="135" width="135">
 </a>
-
 <a href=https://github.com/ruby-numo/gnuplot-demo/blob/master/gnuplot/md/502rgb_variable/README.md>
 <img src="https://raw.githubusercontent.com/ruby-numo/gnuplot-demo/master/gnuplot/md/502rgb_variable/image/006.png" height="135" width="135">
 </a>
-
 <a href=https://github.com/ruby-numo/gnuplot-demo/blob/master/gnuplot/md/207hidden2/README.md>
 <img src="https://raw.githubusercontent.com/ruby-numo/gnuplot-demo/master/gnuplot/md/207hidden2/image/001.png" height="135" width="135">
 </a>
-
 <a href=https://github.com/ruby-numo/gnuplot-demo/blob/master/gnuplot/md/905transparent_solids/README.md>
 <img src="https://raw.githubusercontent.com/ruby-numo/gnuplot-demo/master/gnuplot/md/905transparent_solids/image/002.png" height="135" width="135">
 </a>
-
 </div>
 
 Alpha version under development.
