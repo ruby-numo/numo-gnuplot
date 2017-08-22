@@ -524,7 +524,7 @@ class Gnuplot
     NEED_QUOTE_TIME = /^timef(mt?)?/
 
     def quote_time(s)
-      "\"\\\"#{s}\\\"\""
+      "'#{s}'"
     end
 
     NEED_QUOTE = %w[
@@ -870,22 +870,27 @@ class Gnuplot
 
     def line_str(i)
       @data.map do |a|
-        v = a[i]
-        case v
-        when Float,Rational
-          s = data_format % v
-        when Numeric
-          s = v.to_s
-        else
-          s = v.to_s
+        PlotData.quote_data(a[i])
+      end.join(" ")
+    end
+
+    def self.quote_data(v)
+      case v
+      when Float,Rational
+        DATA_FORMAT % v
+      when Numeric
+        v.to_s
+      else
+        s = v.to_s.gsub(/\n/,'\n')
+        if /^(e|.*[ \t].*)$/ =~ s
           if /"/ =~ s
-            raise GnuplotError,"should not include double quotation in data"
-          else
-            s = '"'+s+'"'
+            raise GnuplotError,"Datastrings cannot include"+
+              " double quotation and space simultaneously"
           end
+          s = '"'+s+'"'
         end
         s
-      end.join(" ")
+      end
     end
 
     def self.array_shape(a)
