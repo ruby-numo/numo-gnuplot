@@ -583,8 +583,8 @@ class Gnuplot
 
     def parse_kv(s,v)
       k = from_symbol(s)
-      case s.to_sym
-      when :at
+      case s.to_s
+      when /^at(_.*)?$/
         case v
         when String
           "#{k} #{v}" # not quote
@@ -593,7 +593,7 @@ class Gnuplot
         else
           "#{k} #{parse(v)}"
         end
-      when :label
+      when "label"
         case v
         when String
           "#{k} #{OptArg.quote(v)}"
