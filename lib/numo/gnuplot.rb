@@ -35,11 +35,14 @@ class Gnuplot
       @block = block
     end
 
+    @@pool = nil
+
     def to_iruby
       require 'tempfile'
       tempfile_svg = Tempfile.open(['plot','.svg'])
       # output SVG to tmpfile
-      gp = Gnuplot.default
+      @@pool ||= Gnuplot.new(persist:false)
+      gp = @@pool
       gp.reset
       gp.set terminal:'svg'
       gp.set output:tempfile_svg.path
@@ -51,12 +54,15 @@ class Gnuplot
     end
   end
 
-  def initialize(gnuplot_command="gnuplot")
+  def initialize(path:"gnuplot", persist:true)
+    @path = path
+    @persist = persist
     @history = []
     @debug = false
     r0,@iow = IO.pipe
     @ior,w2 = IO.pipe
-    IO.popen(gnuplot_command,:in=>r0,:err=>w2)
+    path += " -persist" if persist
+    IO.popen(path,:in=>r0,:err=>w2)
     r0.close
     w2.close
     @gnuplot_version = send_cmd("print GPVAL_VERSION")[0].chomp
@@ -69,6 +75,8 @@ class Gnuplot
     end
   end
 
+  attr_reader :path
+  attr_reader :persist
   attr_reader :history
   attr_reader :last_message
   attr_reader :gnuplot_version
