@@ -829,10 +829,6 @@ class Gnuplot
   # @private
   class PlotData  # :nodoc: all
 
-    def data_format
-      @data_format || DATA_FORMAT
-    end
-
     def initialize(*data)
       if data.empty?
         raise ArgumentError,"no data"
@@ -1025,7 +1021,7 @@ class Gnuplot
 
     def data_str
       if @text
-        f = data_format
+        f = DATA_FORMAT
         s = ""
         @data.to_a.each do |b|
           s << b.map{|e| f%e}.join(" ")+"\n"
