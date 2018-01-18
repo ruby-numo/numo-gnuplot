@@ -1,36 +1,36 @@
 # Numo::Gnuplot : Gnuplot interface for Ruby
 
 <div class="row">
-<a href=https://github.com/ruby-numo/gnuplot-demo/blob/master/gnuplot/md/006histograms/README.md>
-<img src="https://raw.githubusercontent.com/ruby-numo/gnuplot-demo/master/gnuplot/md/006histograms/image/006.png" height="135" width="135">
+<a href=https://github.com/ruby-numo/numo-gnuplot-demo/blob/master/gnuplot/md/006histograms/README.md>
+<img src="https://raw.githubusercontent.com/ruby-numo/numo-gnuplot-demo/master/gnuplot/md/006histograms/image/006.png" height="135" width="135">
 </a>
-<a href=https://github.com/ruby-numo/gnuplot-demo/blob/master/gnuplot/md/501rainbow/README.md>
-<img src="https://raw.githubusercontent.com/ruby-numo/gnuplot-demo/master/gnuplot/md/501rainbow/image/002.png" height="135" width="135">
+<a href=https://github.com/ruby-numo/numo-gnuplot-demo/blob/master/gnuplot/md/501rainbow/README.md>
+<img src="https://raw.githubusercontent.com/ruby-numo/numo-gnuplot-demo/master/gnuplot/md/501rainbow/image/002.png" height="135" width="135">
 </a>
-<a href=https://github.com/ruby-numo/gnuplot-demo/blob/master/gnuplot/md/603finance/README.md>
-<img src="https://raw.githubusercontent.com/ruby-numo/gnuplot-demo/master/gnuplot/md/603finance/image/013.png" height="135" width="135">
+<a href=https://github.com/ruby-numo/numo-gnuplot-demo/blob/master/gnuplot/md/603finance/README.md>
+<img src="https://raw.githubusercontent.com/ruby-numo/numo-gnuplot-demo/master/gnuplot/md/603finance/image/013.png" height="135" width="135">
 </a>
-<a href=https://github.com/ruby-numo/gnuplot-demo/blob/master/gnuplot/md/502rgb_variable/README.md>
-<img src="https://raw.githubusercontent.com/ruby-numo/gnuplot-demo/master/gnuplot/md/502rgb_variable/image/006.png" height="135" width="135">
+<a href=https://github.com/ruby-numo/numo-gnuplot-demo/blob/master/gnuplot/md/502rgb_variable/README.md>
+<img src="https://raw.githubusercontent.com/ruby-numo/numo-gnuplot-demo/master/gnuplot/md/502rgb_variable/image/006.png" height="135" width="135">
 </a>
-<a href=https://github.com/ruby-numo/gnuplot-demo/blob/master/gnuplot/md/207hidden2/README.md>
-<img src="https://raw.githubusercontent.com/ruby-numo/gnuplot-demo/master/gnuplot/md/207hidden2/image/001.png" height="135" width="135">
+<a href=https://github.com/ruby-numo/numo-gnuplot-demo/blob/master/gnuplot/md/207hidden2/README.md>
+<img src="https://raw.githubusercontent.com/ruby-numo/numo-gnuplot-demo/master/gnuplot/md/207hidden2/image/001.png" height="135" width="135">
 </a>
-<a href=https://github.com/ruby-numo/gnuplot-demo/blob/master/gnuplot/md/905transparent_solids/README.md>
-<img src="https://raw.githubusercontent.com/ruby-numo/gnuplot-demo/master/gnuplot/md/905transparent_solids/image/002.png" height="135" width="135">
+<a href=https://github.com/ruby-numo/numo-gnuplot-demo/blob/master/gnuplot/md/905transparent_solids/README.md>
+<img src="https://raw.githubusercontent.com/ruby-numo/numo-gnuplot-demo/master/gnuplot/md/905transparent_solids/image/002.png" height="135" width="135">
 </a>
 </div>
 
 Alpha version under development.
 
-* [GitHub site](https://github.com/ruby-numo/gnuplot)
+* [GitHub site](https://github.com/ruby-numo/numo-gnuplot)
 * [RubyGems site](https://rubygems.org/gems/numo-gnuplot)
 * [Demo repository](https://github.com/ruby-numo/numo-gnuplot-demo) contains > 500 plots!
 
-* [API doc](http://www.rubydoc.info/gems/numo-gnuplot/0.2.1/Numo/Gnuplot)
-* [Introduction.ja](https://github.com/ruby-numo/gnuplot/wiki/Introduction.ja) (in Japanese)
+* [API doc](http://www.rubydoc.info/gems/numo-gnuplot/Numo/Gnuplot)
+* [Introduction.ja](https://github.com/ruby-numo/numo-gnuplot/wiki/Introduction.ja) (in Japanese)
 
-Although there are many [other Gnuplot interface libraries for Ruby](https://github.com/ruby-numo/gnuplot#related-work),
+Although there are many [other Gnuplot interface libraries for Ruby](https://github.com/ruby-numo/numo-gnuplot#related-work),
 none of them have so simple interface as to show an XY data plot by just typing:
 
     plot x,y
@@ -253,4 +253,4 @@ See [API doc](http://www.rubydoc.info/gems/numo-gnuplot/Numo/Gnuplot) for more.
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at
-https://github.com/ruby-numo/gnuplot.
+https://github.com/ruby-numo/numo-gnuplot.
