@@ -18,7 +18,7 @@ module Numo
 
 class Gnuplot
 
-  VERSION = "0.2.4"
+  VERSION = '0.2.4'
   POOL = []
   DATA_FORMAT = "%.7g"
 
@@ -29,9 +29,8 @@ class Gnuplot
   class NotePlot
 
     def initialize(&block)
-      if block.nil?
-        raise ArgumentError,"block is needed"
-      end
+      raise ArgumentError, 'block is needed' if block.nil?
+
       @block = block
     end
 
@@ -39,30 +38,30 @@ class Gnuplot
 
     def to_iruby
       require 'tempfile'
-      tempfile_svg = Tempfile.open(['plot','.svg'])
+      tempfile_svg = Tempfile.open(['plot', '.svg'])
       # output SVG to tmpfile
-      @@pool ||= Gnuplot.new(persist:false)
+      @@pool ||= Gnuplot.new(persist: false)
       gp = @@pool
       gp.reset
-      gp.set terminal:'svg'
-      gp.set output:tempfile_svg.path
+      gp.set terminal: 'svg'
+      gp.set output: tempfile_svg.path
       gp.instance_eval(&@block)
       gp.unset 'output'
       svg = File.read(tempfile_svg.path)
       tempfile_svg.close
-      ["image/svg+xml",svg]
+      ['image/svg+xml', svg]
     end
   end
 
-  def initialize(path:"gnuplot", persist:true)
+  def initialize(path: 'gnuplot', persist: true)
     @path = path
     @persist = persist
     @history = []
     @debug = false
-    r0,@iow = IO.pipe
-    @ior,w2 = IO.pipe
-    path += " -persist" if persist
-    IO.popen(path,:in=>r0,:err=>w2)
+    r0, @iow = IO.pipe
+    @ior, w2 = IO.pipe
+    path += ' -persist' if persist
+    IO.popen(path, :in => r0, :err => w2)
     r0.close
     w2.close
     @gnuplot_version = send_cmd("print GPVAL_VERSION")[0].chomp
@@ -70,8 +69,8 @@ class Gnuplot
       ext = $1
       ext = KNOWN_EXT[ext] || ext
       opts = ENV['NUMO_GNUPLOT_OPTION'] || ''
-      set terminal:[ext,opts]
-      set output:filename
+      set terminal: [ext, opts]
+      set output: filename
     end
   end
 
@@ -83,22 +82,22 @@ class Gnuplot
 
   # draw 2D functions and data.
   def plot(*args)
-    contents = parse_plot_args(PlotItem,args)
-    _plot_splot("plot",contents)
+    contents = parse_plot_args(PlotItem, args)
+    _plot_splot('plot', contents)
     nil
   end
 
   # draws 2D projections of 3D surfaces and data.
   def splot(*args)
-    contents = parse_plot_args(SPlotItem,args)
-    _plot_splot("splot",contents)
+    contents = parse_plot_args(SPlotItem, args)
+    _plot_splot('splot', contents)
     nil
   end
 
-  def _plot_splot(cmd,contents)
-    r = contents.shift.map{|x| "#{x} "}.join
-    c = contents.map{|x| x.cmd_str}.join(", ")
-    d = contents.map{|x| x.data_str}.join
+  def _plot_splot(cmd, contents)
+    r = contents.shift.map { |x| "#{x} " }.join
+    c = contents.map(&:cmd_str).join(', ')
+    d = contents.map(&:data_str).join
     run "#{cmd} #{r}#{c}", d
     @last_data = d
     nil
@@ -106,7 +105,7 @@ class Gnuplot
   private :_plot_splot
 
   # replot is not recommended, use refresh
-  def replot(arg=nil)
+  def replot(arg = nil)
     run "replot #{arg}", @last_data
     nil
   end
@@ -116,7 +115,7 @@ class Gnuplot
   # nonlinear least-squares (NLLS) Marquardt-Levenberg algorithm.
   def fit(*args)
     range, items = parse_fit_args(args)
-    r = range.map{|x| "#{x} "}.join
+    r = range.map { |x| "#{x} " }.join
     c = items.cmd_str
     puts send_cmd("fit #{r}#{c}")
     nil
@@ -127,12 +126,12 @@ class Gnuplot
   # in the `fit`section).  This is useful for saving the current
   # values for later use or for restarting a converged or stopped fit.
   def update(*filenames)
-    puts send_cmd("update "+filenames.map{|f| OptArg.quote(f)}.join(" "))
+    puts send_cmd('update ' + filenames.map { |f| OptArg.quote(f) }.join(' '))
   end
 
   # This command prepares a statistical summary of the data in one or
   # two columns of a file.
-  def stats(filename,*args)
+  def stats(filename, *args)
     fn = OptArg.quote(filename)
     opt = OptArg.parse(*args)
     puts send_cmd "stats #{fn} #{opt}"
@@ -151,7 +150,7 @@ class Gnuplot
   end
 
   # The `help` command displays built-in help.
-  def help(s=nil)
+  def help(s = nil)
     puts send_cmd "help #{s}\n\n"
   end
 
@@ -162,7 +161,7 @@ class Gnuplot
 
   #  The `reset` command causes all graph-related options that can be
   #  set with the `set` command to take on their default values.
-  def reset(x=nil)
+  def reset(x = nil)
     run "reset #{x}"
     nil
   end
@@ -203,26 +202,26 @@ class Gnuplot
   # The `clear` command erases the current screen or output device as specified
   # by `set output`. This usually generates a formfeed on hardcopy devices.
   def clear
-    send_cmd "clear"
+    send_cmd 'clear'
     nil
   end
 
   # The `exit` and `quit` commands will exit `gnuplot`.
   def exit
-    send_cmd "exit"
+    send_cmd 'exit'
     nil
   end
 
   # The `exit` and `quit` commands will exit `gnuplot`.
   def quit
-    send_cmd "quit"
+    send_cmd 'quit'
     nil
   end
 
   # The `refresh` reformats and redraws the current plot using the
   # data already read in.
   def refresh
-    send_cmd "refresh"
+    send_cmd 'refresh'
     nil
   end
 
@@ -230,31 +229,30 @@ class Gnuplot
   def var(name)
     res = send_cmd("print #{name}").join("").chomp
     if /undefined variable:/ =~ res
-      kernel_raise GnuplotError,res.strip
+      kernel_raise GnuplotError, res.strip
     end
     res
   end
 
-  KNOWN_EXT = {"ps"=>"postscript","jpg"=>"jpeg"}
+  KNOWN_EXT = { "ps" => "postscript", "jpg" => "jpeg" }
 
   # output current plot to file with terminal setting from extension
   # (not Gnuplot command)
-  def output(filename,**opts)
+  def output(filename, **opts)
     term = opts.delete(:term) || opts.delete(:terminal)
     if term.nil? && /\.(\w+)$/ =~ filename
       term = $1
     end
     term = KNOWN_EXT[term] || term
     if term.nil?
-      kernel_raise GnuplotError,"file extension is not given"
+      kernel_raise GnuplotError, 'file extension is not given'
     end
     set :terminal, term, *opts
-    set output:filename
+    set output: filename
     refresh
     unset :terminal
     unset :output
   end
-
 
   # turn on debug
   def debug_on
@@ -291,35 +289,36 @@ class Gnuplot
 
   # for irb workspace name
   def to_s
-    "gnuplot"
+    'gnuplot'
   end
 
   # private methods
 
-  def run(s,data=nil)
-    res = send_cmd(s,data)
-    if !res.empty?
+  def run(s, data = nil)
+    res = send_cmd(s, data)
+    unless res.empty?
       if /.*?End\sof\sanimation\ssequence.*?/im =~ res.to_s
         return nil
       end
+
       if res.size < 7
         if /^\s*(line \d+: )?warning:/i =~ res[0]
           $stderr.puts res.join.strip
           return nil
         else
-          msg = "\n"+res.join.strip
+          msg = "\n" + res.join.strip
         end
       else
-        msg = "\n"+res[0..5].join.strip+"\n :\n"
+        msg = "\n" + res[0..5].join.strip + "\n :\n"
       end
-      kernel_raise GnuplotError,msg
+      kernel_raise GnuplotError, msg
     end
     nil
   end
 
   def send_cmd(s,data=nil)
     if @debug
-      puts "<"+s
+      puts '<' + s
       if data && !data.empty?
         if data.size > 144
           s1 = data[0..71]
@@ -372,13 +371,15 @@ class Gnuplot
     @iow.flush
     @history << s
     @last_message = []
-    while line=@ior.gets
+    while (line = @ior.gets)
       break if /^_end_of_cmd_$/ =~ line.chomp
-      puts ">"+line if @debug
+
+      puts '>' + line if @debug
       @last_message << line
     end
     @last_message
   end
+
   private :send_cmd
 
   def parse_plot_args(cPlotItem,args)
@@ -490,36 +491,26 @@ class Gnuplot
     end
 
     def parse(*opts)
-      sep = ","
+      sep = ','
       a = []
-      while opt = opts.shift
-        if !opt.kind_of?(Numeric)
-          sep = " "
-        end
+      while (opt = opts.shift)
+        sep = ' ' unless opt.is_a?(Numeric)
         case opt
         when Symbol
           a << from_symbol(opt)
           case opt
           when :label
-            if opts.first.kind_of?(Integer)
-              a << opts.shift.to_s
-            end
-            if opts.first.kind_of?(String)
-              a << OptArg.quote(opts.shift)
-            end
+            a << opts.shift.to_s if opts.first.kind_of?(Integer)
+            a << OptArg.quote(opts.shift) if opts.first.kind_of?(String)
           when NEED_QUOTE_TIME
-            if opts.first.kind_of?(String)
-              a << OptArg.quote_time(opts.shift)
-            end
+            a << OptArg.quote_time(opts.shift) if opts.first.kind_of?(String)
           when NEED_QUOTE
-            if opts.first.kind_of?(String)
-              a << OptArg.quote(opts.shift)
-            end
+            a << OptArg.quote(opts.shift) if opts.first.kind_of?(String)
           end
         when Array
           a << parse(*opt)
         when Hash
-          a << opt.map{|k,v| parse_kv(k,v)}.compact.join(" ")
+          a << opt.map { |k, v| parse_kv(k, v) }.compact.join(' ')
         when Range
           a << "[#{opt.begin}:#{opt.end}]"
         else
@@ -1022,19 +1013,19 @@ class Gnuplot
     def data_str
       if @text
         f = DATA_FORMAT
-        s = ""
+        s = ''
         @data.to_a.each do |b|
-          s << b.map{|e| f%e}.join(" ")+"\n"
+          s << b.map { |e| f % e }.join(' ') + "\n"
         end
-        s+"\ne"
-      elsif defined? Numo::NArray && @data.kind_of?(Numo::NArray)
+        s + "\ne"
+      elsif defined? Numo::NArray && @data.is_a?(Numo::NArray)
         @data.to_string
-      elsif @data.kind_of?(Array)
+      elsif @data.is_a?(Array)
         @data.pack("d*")
       elsif @data.repond_to?(:to_a)
         @data.to_a.pack("d*")
       else
-        raise TypeError,"invalid data type: #{@data.class}"
+        raise TypeError, "invalid data type: #{@data.class}"
       end
     end
   end
@@ -1043,7 +1034,7 @@ class Gnuplot
   class RgbImageData < ImageData  # :nodoc: all
 
     def initialize(data)
-      if data.kind_of?(Numo::NArray)
+      if data.is_a?(Numo::NArray)
         super(data)
       else
         super(Numo::NArray[*data])
@@ -1052,20 +1043,20 @@ class Gnuplot
 
     def check_shape
       if @data.shape.size != 3
-        raise IndexError,"array should be 2-dimensional"
+        raise IndexError, 'array should be 2-dimensional'
       end
       if @data.shape[2] != 3
-        raise IndexError,"shape[2] (last dimension size) must be 3"
+        raise IndexError, 'shape[2] (last dimension size) must be 3'
       end
       @shape = @data.shape
     end
   end
 
   # @private
-  class RgbAlphaData < ImageData  # :nodoc: all
+  class RgbAlphaData < ImageData # :nodoc: all
 
     def initialize(data)
-      if data.kind_of?(Numo::NArray)
+      if data.is_a?(Numo::NArray)
         super(data)
       else
         super(Numo::NArray[*data])
@@ -1074,10 +1065,10 @@ class Gnuplot
 
     def check_shape
       if @data.shape.size != 3
-        raise IndexError,"array should be 2-dimensional"
+        raise IndexError, 'array should be 2-dimensional'
       end
       if @data.shape[2] != 4
-        raise IndexError,"shape[2] (last dimension size) must be 4"
+        raise IndexError, 'shape[2] (last dimension size) must be 4'
       end
       @shape = @data.shape
     end
