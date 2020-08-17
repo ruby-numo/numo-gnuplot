@@ -243,7 +243,6 @@ See [API doc](http://www.rubydoc.info/gems/numo-gnuplot/Numo/Gnuplot) for more.
 
 * [Ruby Gnuplot](https://github.com/rdp/ruby_gnuplot)
 * [ruby-plot](https://github.com/davor/ruby-plot)
-* [Plotrobber](https://github.com/elitheeli/plotrobber)
 * [GNUPlotr](https://github.com/pbosetti/gnuplotr)
 * [GnuPlotter](https://github.com/maasha/gnuplotter)
 * [scbi_plot](https://rubygems.org/gems/scbi_plot)
