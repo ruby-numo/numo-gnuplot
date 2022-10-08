@@ -368,6 +368,7 @@ class Gnuplot
     @iow.puts s
     @iow.puts data
     @iow.flush
+    @iow.puts 
     @iow.puts "print '_end_of_cmd_'"
     @iow.flush
     @history << s
